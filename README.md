@@ -23,17 +23,6 @@ pip install -r requirements.txt
 pip install -e .
 ```
 
-### Requirements
-
-```
-torch>=1.9.0
-scanpy>=1.8.0
-tqdm>=4.60.0
-fastapi>=0.100.0
-uvicorn>=0.23.0
-pydantic>=2.0.0,<3.0.0
-python-multipart>=0.0.6
-```
 
 ## Quick Start
 
