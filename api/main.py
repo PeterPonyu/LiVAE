@@ -7,7 +7,7 @@ import os
 import torch
 from typing import Optional
 import asyncio
-import datetime
+from datetime import datetime
 
 # Import your existing model
 from livae.agent import agent
@@ -16,7 +16,7 @@ from livae.agent import agent
 from .models import (
     AnnDataSummary, AgentParameters, TrainingConfig, TrainingState, 
     TrainingMetrics, EmbeddingResult, UploadResponse, TrainingResponse,
-    DownloadResponse, ShapeInfo
+    ShapeInfo
 )
 from .utils import (
     load_anndata_from_path, create_anndata_summary, apply_qc_filtering,
@@ -148,8 +148,8 @@ async def start_training(
     try:
         # Apply QC filtering if thresholds provided
         training_data = state.adata
-        if config.qc_thresholds:
-            training_data = apply_qc_filtering(state.adata, config.qc_thresholds)
+        if config.qcparams:
+            training_data = apply_qc_filtering(state.adata, config.qcparams)
         
         # Auto-detect device
         device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
@@ -182,13 +182,9 @@ async def start_training(
         # Start training in background
         background_tasks.add_task(run_training, config.epochs)
         
-        # Estimate duration (rough estimate: 1 sec per epoch)
-        estimated_duration = config.epochs * 1.0 / 60  # minutes
-        
         return TrainingResponse(
             success=True,
             message=f"Training started with {config.epochs} epochs on {device}",
-            estimated_duration_min=estimated_duration
         )
         
     except Exception as e:

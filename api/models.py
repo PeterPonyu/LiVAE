@@ -1,8 +1,7 @@
 
 from pydantic import BaseModel, Field
-from typing import Dict, List, Optional, Union, Any
+from typing import Dict, List, Optional, Union
 from datetime import datetime
-import torch
 
 # Basic info models
 class ShapeInfo(BaseModel):
@@ -65,8 +64,9 @@ class AnnDataSummary(BaseModel):
     file_size_mb: Optional[float] = None
     loaded_at: datetime = Field(default_factory=datetime.now)
 
-class QCThresholds(BaseModel):
-    """User-defined QC filtering thresholds"""
+class QCParams(BaseModel):
+    """User-defined QC filtering params"""
+    species: str = Field(default='human', description="Species for QC metrics (human or mouse)")
     min_genes_per_cell: Optional[int] = Field(None, ge=0)
     max_genes_per_cell: Optional[int] = Field(None, ge=0)  
     min_counts_per_cell: Optional[int] = Field(None, ge=0)
@@ -92,7 +92,7 @@ class AgentParameters(BaseModel):
 class TrainingConfig(BaseModel):
     """Training configuration"""
     epochs: int = Field(default=1000, gt=0, description="Number of training epochs")
-    qc_thresholds: Optional[QCThresholds] = Field(None, description="QC filtering thresholds")
+    qcparams: Optional[QCParams] = Field(None, description="QC filtering params")
 
 class TrainingMetrics(BaseModel):
     """Training metrics at specific epoch"""
@@ -135,11 +135,4 @@ class TrainingResponse(BaseModel):
     """Training start response"""
     success: bool
     message: str
-    estimated_duration_min: Optional[float] = None
 
-class DownloadResponse(BaseModel):
-    """File download response"""
-    success: bool
-    message: str
-    download_url: Optional[str] = None
-    filename: Optional[str] = None

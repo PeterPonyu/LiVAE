@@ -3,31 +3,36 @@ import scanpy as sc
 import pandas as pd
 import numpy as np
 from anndata import AnnData
-from typing import Dict, List, Optional, Any, Union
+from typing import Dict, Any, Union
 import os
 from datetime import datetime
 
 from .models import (
     AnnDataSummary, ShapeInfo, LayerInfo, ColumnInfo, 
-    QCMetrics, QCThresholds
+    QCMetrics, QCParams
 )
 
 def load_anndata_from_path(file_path: str) -> AnnData:
     """Load AnnData from file path"""
     try:
         adata = sc.read_h5ad(file_path)
+        adata.layers['counts'] = adata.X.copy()  # Preserve original counts for agent
         return adata
     except Exception as e:
         raise ValueError(f"Failed to load AnnData file: {str(e)}")
 
-def calculate_qc_metrics(adata: AnnData) -> QCMetrics:
+def calculate_qc_metrics(adata: AnnData, species: str) -> QCMetrics:
     """Calculate scanpy-style QC metrics"""
     # Create a copy to avoid modifying original
     adata_temp = adata.copy()
-    
-    # Calculate basic metrics
-    adata_temp.var['mt'] = adata_temp.var_names.str.startswith('MT-')
-    adata_temp.var['ribo'] = adata_temp.var_names.str.startswith(('RPS', 'RPL'))
+
+    if species.lower() == 'human':
+        # Calculate basic metrics
+        adata_temp.var['mt'] = adata_temp.var_names.str.startswith('MT-')
+        adata_temp.var['ribo'] = adata_temp.var_names.str.startswith(('RPS', 'RPL'))
+    else:
+        adata_temp.var['mt'] = adata_temp.var_names.str.startswith('mt-')
+        adata_temp.var['ribo'] = adata_temp.var_names.str.startswith(('rps', 'rpl'))
     
     # Calculate QC metrics using scanpy
     sc.pp.calculate_qc_metrics(
@@ -72,9 +77,9 @@ def calculate_qc_metrics(adata: AnnData) -> QCMetrics:
         pct_counts_ribo=_get_stats(adata_temp.obs['pct_counts_ribo']) if 'pct_counts_ribo' in adata_temp.obs else _get_stats(np.zeros(adata_temp.n_obs))
     )
 
-def apply_qc_filtering(adata: AnnData, thresholds: QCThresholds) -> AnnData:
+def apply_qc_filtering(adata: AnnData, QCParams: QCParams) -> AnnData:
     """Apply QC filtering based on thresholds"""
-    if thresholds is None:
+    if QCParams is None:
         return adata
         
     # Create a copy for filtering
@@ -82,16 +87,14 @@ def apply_qc_filtering(adata: AnnData, thresholds: QCThresholds) -> AnnData:
     
     # Calculate QC metrics if not present
     if 'n_genes_by_counts' not in adata_filtered.obs.columns:
-        calculate_qc_metrics(adata_filtered)  # This will add the metrics to obs
+        calculate_qc_metrics(adata_filtered, QCParams.species)  # This will add the metrics to obs
     
     # Apply filters
-    sc.pp.filter_cells(adata_filtered, min_genes=thresholds.min_genes_per_cell or 0)
-    if thresholds.max_genes_per_cell:
-        sc.pp.filter_cells(adata_filtered, max_genes=thresholds.max_genes_per_cell)
+    sc.pp.filter_cells(adata_filtered, min_genes=QCParams.min_genes_per_cell or 0)
+    if QCParams.max_genes_per_cell:
+        sc.pp.filter_cells(adata_filtered, max_genes=QCParams.max_genes_per_cell)
     
-    # Additional filtering based on counts and percentages would go here
-    # This is a simplified version - you might want more sophisticated filtering
-    
+    # Additional filtering based on counts and percentages would go here    
     return adata_filtered
 
 def get_layer_info(data, layer_name: str, shape: ShapeInfo) -> LayerInfo:
@@ -171,16 +174,12 @@ def create_anndata_summary(adata: AnnData, filename: str = None, file_size_bytes
     # Variable columns (.var)
     var_columns = [get_column_info(adata.var[col]) for col in adata.var.columns]
     
-    # Calculate QC metrics
-    qc_metrics = calculate_qc_metrics(adata)
-    
     return AnnDataSummary(
         shape=shape,
         X_info=X_info,
         layers=layers,
         obs_columns=obs_columns,
         var_columns=var_columns,
-        qc_metrics=qc_metrics,
         filename=filename,
         file_size_mb=file_size_bytes / 1024 / 1024 if file_size_bytes else None
     )

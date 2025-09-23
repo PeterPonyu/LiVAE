@@ -163,7 +163,19 @@ class Env(LiVAE, envMixin):
         """
         # Extract and log-transform the specified data layer
         # Note: .A converts sparse matrix to dense if necessary
-        self.X = np.log1p(adata.layers[layer].A)
+
+        data = adata.layers[layer]
+        if hasattr(data, 'toarray'):
+            # Sparse matrix (scipy.sparse)
+            data_dense = data.toarray()
+        elif hasattr(data, 'A'):
+            # Numpy matrix (less common, but handle it)
+            data_dense = data.A
+        else:
+            # Already dense (numpy array or similar)
+            data_dense = np.asarray(data)
+        
+        self.X = np.log1p(data_dense)
         
         # Store dataset dimensions
         self.n_obs = adata.shape[0]  # Number of observations (cells)

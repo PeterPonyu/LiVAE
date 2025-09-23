@@ -179,7 +179,7 @@ class agent(Env):
         # Forward pass through VAE and extract interpretable embedding (le)
         # Index [-3] corresponds to 'le' in the return tuple:
         # (q_z, q_m, q_s, pred_x, le, ld, pred_xl, z_lorentz, ld_lorentz)
-        interpretable_embedding = self.nn(input_tensor)[-3]
+        interpretable_embedding = self.nn(input_tensor)[-5]
         
         # Detach from computation graph and convert to NumPy
         return interpretable_embedding.detach().cpu().numpy()
