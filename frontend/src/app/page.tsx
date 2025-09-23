@@ -2,45 +2,35 @@
 // src/app/page.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Upload, Activity, Download, Settings } from 'lucide-react';
+import React from 'react';
+import { Upload, Activity, Download, Settings, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { api } from '@/lib/api/endpoints';
-import type { AppStatus } from '@/types/index';
+import { useAppStatus } from '@/lib/hooks/useAppStatus';
 
 export default function Home() {
-  const [status, setStatus] = useState<AppStatus | null>(null);
-  const [loading, setLoading] = useState(false);
+  const { 
+    data_loaded, 
+    model_trained, 
+    training_running, 
+    device, 
+    is_loading, 
+    connection_error,
+    last_updated,
+    refresh 
+  } = useAppStatus();
 
-  useEffect(() => {
-    // Check backend status on page load
-    const checkStatus = async () => {
-      try {
-        const result = await api.getStatus();
-        setStatus(result);
-      } catch (error) {
-        console.error('Failed to check status:', error);
-      }
-    };
-    
-    checkStatus();
-  }, []);
-
-  const testConnection = async () => {
-    setLoading(true);
-    try {
-      const result = await api.getStatus();
-      setStatus(result);
-    } catch (error) {
-      console.error('Connection failed:', error);
-      setStatus(null);
-    } finally {
-      setLoading(false);
-    }
+  // Determine the actual state more accurately
+  const getTrainingStatus = () => {
+    if (training_running) return 'running';
+    if (model_trained && !training_running) return 'completed';
+    if (data_loaded) return 'ready';
+    return 'no-data';
   };
+
+  const trainingStatus = getTrainingStatus();
 
   return (
     <div className="container mx-auto p-8 max-w-6xl">
@@ -58,52 +48,91 @@ export default function Home() {
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             System Status
-            <Button 
-              onClick={testConnection} 
-              disabled={loading}
-              variant="outline"
-              size="sm"
-            >
-              {loading ? 'Checking...' : 'Refresh'}
-            </Button>
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-gray-500">
+                Updated: {last_updated.toLocaleTimeString()}
+              </span>
+              <Button 
+                onClick={refresh} 
+                disabled={is_loading}
+                variant="outline"
+                size="sm"
+              >
+                <RefreshCw className={`h-4 w-4 ${is_loading ? 'animate-spin' : ''}`} />
+              </Button>
+            </div>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {status ? (
+          {connection_error ? (
+            <div className="text-center text-red-600">
+              <p>❌ Unable to connect to backend server</p>
+              <p className="text-sm mt-1">Make sure the server is running on http://127.0.0.1:8000</p>
+            </div>
+          ) : (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="text-center">
-                <Badge variant={status.data_loaded ? "default" : "secondary"}>
-                  {status.data_loaded ? "Loaded" : "No Data"}
+                <Badge variant={data_loaded ? "default" : "secondary"}>
+                  {data_loaded ? "✅ Loaded" : "📋 No Data"}
                 </Badge>
                 <div className="text-sm text-gray-600 mt-1">Dataset</div>
               </div>
+              
               <div className="text-center">
-                <Badge variant={status.model_trained ? "default" : "secondary"}>
-                  {status.model_trained ? "Trained" : "Not Trained"}
+                <Badge variant={
+                  trainingStatus === 'completed' ? "default" :
+                  trainingStatus === 'running' ? "destructive" :
+                  trainingStatus === 'ready' ? "secondary" : "outline"
+                }>
+                  {trainingStatus === 'completed' ? "✅ Trained" :
+                   trainingStatus === 'running' ? "🔄 Training" :
+                   trainingStatus === 'ready' ? "⚡ Ready" : "⏸️ Not Started"}
                 </Badge>
                 <div className="text-sm text-gray-600 mt-1">Model</div>
               </div>
+              
               <div className="text-center">
-                <Badge variant={status.training_running ? "destructive" : "secondary"}>
-                  {status.training_running ? "Running" : "Idle"}
+                <Badge variant={training_running ? "destructive" : "secondary"}>
+                  {training_running ? "🏃‍♂️ Running" : "💤 Idle"}
                 </Badge>
-                <div className="text-sm text-gray-600 mt-1">Training</div>
+                <div className="text-sm text-gray-600 mt-1">Training Process</div>
               </div>
+              
               <div className="text-center">
                 <Badge variant="outline">
-                  {status.device}
+                  {device === 'cuda' ? '🚀 GPU' : 
+                   device === 'mps' ? '🍎 Metal' : '🖥️ CPU'}
                 </Badge>
                 <div className="text-sm text-gray-600 mt-1">Device</div>
               </div>
             </div>
-          ) : (
-            <div className="text-center text-gray-600">
-              <p>Unable to connect to backend server</p>
-              <p className="text-sm mt-1">Make sure the server is running on http://127.0.0.1:8000</p>
-            </div>
           )}
         </CardContent>
       </Card>
+
+      {/* Training Status Alert */}
+      {training_running && (
+        <Card className="mb-8 bg-blue-50 border-blue-200">
+          <CardContent className="pt-6">
+            <div className="flex flex-col sm:flex-row items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                <div>
+                  <h3 className="font-semibold text-blue-800">Training in Progress</h3>
+                  <p className="text-blue-600 text-sm">
+                    Your model is currently training. Monitor progress in real-time.
+                  </p>
+                </div>
+              </div>
+              <Button asChild className="mt-4 sm:mt-0">
+                <Link href="/training/monitor">
+                  View Progress →
+                </Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Main Workflow */}
       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -124,9 +153,9 @@ export default function Home() {
             <p className="text-sm text-gray-600 mb-4">
               Upload your single-cell RNA-seq data in AnnData (.h5ad) format
             </p>
-            <Button asChild className="w-full" variant={status?.data_loaded ? "outline" : "default"}>
+            <Button asChild className="w-full" variant={data_loaded ? "outline" : "default"}>
               <Link href="/upload">
-                {status?.data_loaded ? "Replace Data" : "Upload Data"}
+                {data_loaded ? "Replace Data" : "Upload Data"}
               </Link>
             </Button>
           </CardContent>
@@ -153,10 +182,10 @@ export default function Home() {
               asChild 
               className="w-full" 
               variant="outline"
-              disabled={!status?.data_loaded}
+              disabled={!data_loaded || training_running}
             >
               <Link href="/training/configure">
-                Configure Training
+                {training_running ? "Training Running..." : "Configure Training"}
               </Link>
             </Button>
           </CardContent>
@@ -170,23 +199,27 @@ export default function Home() {
                 <Activity className="h-6 w-6 text-orange-600" />
               </div>
               <div className="flex-1">
-                <CardTitle className="text-lg">Train Model</CardTitle>
+                <CardTitle className="text-lg">Train & Monitor</CardTitle>
                 <CardDescription>Step 3</CardDescription>
               </div>
             </div>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-gray-600 mb-4">
-              Monitor training progress and metrics in real-time
+              {training_running 
+                ? "Monitor training progress and metrics in real-time"
+                : "Start training and monitor progress"
+              }
             </p>
             <Button 
               asChild 
               className="w-full" 
-              variant="outline"
-              disabled={!status?.data_loaded}
+              variant={training_running ? "default" : "outline"}
+              disabled={!data_loaded}
             >
               <Link href="/training/monitor">
-                {status?.training_running ? "View Training" : "Start Training"}
+                {training_running ? "View Progress" : 
+                 trainingStatus === 'completed' ? "View Results" : "Start Training"}
               </Link>
             </Button>
           </CardContent>
@@ -213,7 +246,7 @@ export default function Home() {
               asChild 
               className="w-full" 
               variant="outline"
-              disabled={!status?.model_trained}
+              disabled={trainingStatus !== 'completed'}
             >
               <Link href="/results">
                 Download Results
@@ -222,27 +255,6 @@ export default function Home() {
           </CardContent>
         </Card>
       </div>
-
-      {/* Quick Actions */}
-      {status?.data_loaded && (
-        <Card className="mt-8 bg-gradient-to-r from-blue-50 to-green-50 border-blue-200">
-          <CardContent className="pt-6">
-            <div className="flex flex-col sm:flex-row items-center justify-between">
-              <div>
-                <h3 className="font-semibold text-blue-800 mb-1">Ready to Continue</h3>
-                <p className="text-blue-600 text-sm">
-                  Your dataset is loaded and ready for training configuration.
-                </p>
-              </div>
-              <Button asChild className="mt-4 sm:mt-0">
-                <Link href="/training/configure">
-                  Configure Training →
-                </Link>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }
