@@ -194,8 +194,9 @@ async def start_training(
             detail=f"Failed to start training: {str(e)}"
         )
 
+
 async def run_training(epochs: int):
-    """Background task for training execution"""
+    """Background task for training execution with 10-epoch averaging"""
     try:
         # Run training using your agent's fit method with custom progress tracking
         for epoch in range(epochs):
@@ -210,33 +211,107 @@ async def run_training(epochs: int):
             
             # Update metrics every 10 epochs (matching your agent logic)
             if (epoch + 1) % 10 == 0:
-                latest_scores = state.agent_instance.score[-1] if state.agent_instance.score else [0]*6
-                latest_loss = state.agent_instance.loss[-1][0] if state.agent_instance.loss else 0
+                # Calculate averages of the last 10 epochs instead of single values
+                avg_metrics = calculate_average_metrics(epoch + 1)
                 
-                metrics = TrainingMetrics(
-                    epoch=epoch + 1,
-                    loss=float(latest_loss),
-                    ari=float(latest_scores[0]),
-                    nmi=float(latest_scores[1]), 
-                    asw=float(latest_scores[2]),
-                    ch=float(latest_scores[3]),
-                    db=float(latest_scores[4]),
-                    pc=float(latest_scores[5])
-                )
-                
-                state.training_state.latest_metrics = metrics
-                state.training_state.history.append(metrics)
+                if avg_metrics:  # Only update if we have valid metrics
+                    metrics = TrainingMetrics(
+                        epoch=epoch + 1,
+                        loss=avg_metrics['loss'],
+                        ari=avg_metrics['ari'],
+                        nmi=avg_metrics['nmi'], 
+                        asw=avg_metrics['asw'],
+                        ch=avg_metrics['ch'],
+                        db=avg_metrics['db'],
+                        pc=avg_metrics['pc']
+                    )
+                    
+                    state.training_state.latest_metrics = metrics
+                    state.training_state.history.append(metrics)
             
             # Small async sleep to prevent blocking
             await asyncio.sleep(0.001)
         
-        # Training completed
+        # Training completed - calculate final averaged metrics
+        final_metrics = calculate_average_metrics(epochs, final=True)
+        if final_metrics:
+            final_training_metrics = TrainingMetrics(
+                epoch=epochs,
+                loss=final_metrics['loss'],
+                ari=final_metrics['ari'],
+                nmi=final_metrics['nmi'], 
+                asw=final_metrics['asw'],
+                ch=final_metrics['ch'],
+                db=final_metrics['db'],
+                pc=final_metrics['pc']
+            )
+            state.training_state.latest_metrics = final_training_metrics
+            # Only append if it's different from the last recorded epoch
+            if not state.training_state.history or state.training_state.history[-1].epoch != epochs:
+                state.training_state.history.append(final_training_metrics)
+        
         state.training_state.is_running = False
         state.training_state.completed_at = datetime.now()
         
     except Exception as e:
         state.training_state.is_running = False
         state.training_state.error_message = str(e)
+
+
+def calculate_average_metrics(current_epoch: int, final: bool = False) -> dict:
+    """
+    Calculate average metrics over the last 10 epochs
+    
+    Args:
+        current_epoch: Current epoch number
+        final: Whether this is the final calculation (use all available data)
+        
+    Returns:
+        Dictionary with averaged metrics or None if insufficient data
+    """
+    try:
+        # Determine how many epochs to average over
+        if final:
+            # For final calculation, use up to last 10 epochs or all available
+            epochs_to_average = min(10, len(state.agent_instance.score))
+        else:
+            # For regular updates, always use exactly 10 epochs
+            epochs_to_average = 10
+            
+        # Check if we have enough data
+        if len(state.agent_instance.score) < epochs_to_average or len(state.agent_instance.loss) < epochs_to_average:
+            return None
+            
+        # Get the last N epochs of scores and losses
+        recent_scores = state.agent_instance.score[-epochs_to_average:]
+        recent_losses = state.agent_instance.loss[-epochs_to_average:]
+        
+        # Calculate averages for each metric
+        # Scores format: each score is [ari, nmi, asw, ch, db, pc]
+        avg_ari = sum(score[0] for score in recent_scores) / len(recent_scores)
+        avg_nmi = sum(score[1] for score in recent_scores) / len(recent_scores)
+        avg_asw = sum(score[2] for score in recent_scores) / len(recent_scores)
+        avg_ch = sum(score[3] for score in recent_scores) / len(recent_scores)
+        avg_db = sum(score[4] for score in recent_scores) / len(recent_scores)
+        avg_pc = sum(score[5] for score in recent_scores) / len(recent_scores)
+        
+        # Loss format: each loss is [total_loss, recon_loss, kl_loss, ...]
+        avg_loss = sum(loss[0] for loss in recent_losses) / len(recent_losses)
+        
+        return {
+            'loss': float(avg_loss),
+            'ari': float(avg_ari),
+            'nmi': float(avg_nmi),
+            'asw': float(avg_asw),
+            'ch': float(avg_ch),
+            'db': float(avg_db),
+            'pc': float(avg_pc)
+        }
+        
+    except (IndexError, TypeError, ValueError) as e:
+        print(f"Error calculating average metrics: {e}")
+        return None
+
 
 @app.get("/training-progress", response_model=TrainingState)
 async def get_training_progress():
