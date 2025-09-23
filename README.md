@@ -2,7 +2,7 @@
 # LiVAE: Lorentzian Interpretable Variational Autoencoder
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![PyTorch](https://img.shields.io/badge/PyTorch-1.9+-red.svg)](https://pytorch.org/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.3+-red.svg)](https://pytorch.org/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 LiVAE (Lorentzian Interpretable Variational Autoencoder) is a novel deep generative model that combines hyperbolic geometry with multiple regularization techniques to learn interpretable latent representations.
@@ -103,8 +103,8 @@ A full-stack application with FastAPI backend and Next.js frontend.
 ## 🚀 Quick Start
 
 ### Prerequisites
-- **Python 3.7+** (for backend)
-- **Node.js** (for frontend static server) or **Python** (alternative)
+- **Python 3.10+** (for backend)
+- **Node.js** (for frontend static server)
 
 ### Option 1: One-Command Start (Recommended)
 ```bash
@@ -125,18 +125,6 @@ uvicorn api.main:app --host 127.0.0.1 --port 8000 --reload
 #### Terminal 2 - Start Frontend
 ```bash
 npx serve frontend/outs -p 3000
-```
-
-## 🔧 Installation
-
-### Backend Dependencies
-```bash
-pip install fastapi uvicorn
-```
-
-### Frontend Server (Choose One)
-```bash
-npm install -g serve
 ```
 
 ## 📞 Quick Commands Reference
