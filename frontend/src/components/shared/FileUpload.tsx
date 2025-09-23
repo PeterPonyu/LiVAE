@@ -3,7 +3,7 @@
 'use client';
 
 import React, { useCallback } from 'react';
-import { useDropzone } from 'react-dropzone';
+import { useDropzone, FileRejection } from 'react-dropzone';
 import { Upload, File, AlertCircle, CheckCircle } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -28,9 +28,8 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   isSuccess = false,
   disabled = false,
 }) => {
-  const onDrop = useCallback((acceptedFiles: File[], rejectedFiles: any[]) => {
+  const onDrop = useCallback((acceptedFiles: File[], rejectedFiles: FileRejection[]) => {
     if (rejectedFiles.length > 0) {
-      // Handle rejected files - will be shown as error in parent
       return;
     }
     
@@ -110,7 +109,6 @@ export const FileUpload: React.FC<FileUploadProps> = ({
         </div>
       </Card>
 
-      {/* Upload Progress */}
       {isUploading && (
         <div className="space-y-2">
           <div className="flex items-center justify-between text-sm">
@@ -121,7 +119,6 @@ export const FileUpload: React.FC<FileUploadProps> = ({
         </div>
       )}
 
-      {/* Error Display */}
       {error && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />

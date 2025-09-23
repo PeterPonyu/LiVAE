@@ -133,7 +133,7 @@ export default function UploadPage() {
         </CardHeader>
         <CardContent className="text-blue-700">
           <p className="mb-2">
-            If you're having trouble uploading your file, make sure:
+            {"If you're having trouble uploading your file, make sure:"}
           </p>
           <ul className="list-disc list-inside space-y-1 text-sm">
             <li>The file is in AnnData (.h5ad) format</li>

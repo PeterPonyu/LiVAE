@@ -213,7 +213,7 @@ export default function ResultsPage() {
                             <YAxis yAxisId="left" orientation="left" domain={['auto', 'auto']} />
                             <YAxis yAxisId="right" orientation="right" domain={[0, 1]} />
                             <Tooltip 
-                              formatter={(value: any, name: string) => [
+                              formatter={(value: number | string, name: string) => [
                                 typeof value === 'number' ? value.toFixed(4) : value,
                                 name.toUpperCase()
                               ]}

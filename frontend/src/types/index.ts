@@ -142,10 +142,6 @@ export interface QCFilterFormData {
   max_pct_ribo?: number;
 }
 
-export interface AgentParametersFormData extends AgentParameters {
-  // Any additional form-specific fields
-}
-
 export interface TrainingConfigFormData {
   epochs: number;
   apply_qc: boolean;

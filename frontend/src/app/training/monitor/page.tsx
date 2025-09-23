@@ -14,21 +14,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useTrainingMonitor } from '@/lib/hooks/useTrainingMonitor';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
-// Custom tooltip component for better formatting
-const CustomTooltip = ({ active, payload, label, formatValue }: any) => {
-  if (active && payload && payload.length) {
-    const value = payload[0].value;
-    return (
-      <div className="bg-white p-3 border rounded shadow-lg">
-        <p className="font-medium">{`Epoch: ${label}`}</p>
-        <p className="text-blue-600">
-          {`${payload[0].name}: ${formatValue ? formatValue(value) : value.toFixed(4)}`}
-        </p>
-      </div>
-    );
-  }
-  return null;
-};
+
+
 
 // Individual chart component
 const MetricChart = ({ 
@@ -41,7 +28,7 @@ const MetricChart = ({
   domain,
   height = 250 
 }: {
-  data: any[];
+  data: Record<string, unknown>[];
   dataKey: string;
   title: string;
   description: string;
@@ -58,6 +45,12 @@ const MetricChart = ({
     
     const firstValue = recent[0][dataKey];
     const lastValue = recent[recent.length - 1][dataKey];
+    
+    // Type guard to ensure values are numbers
+    if (typeof firstValue !== 'number' || typeof lastValue !== 'number') {
+      return null;
+    }
+    
     const change = lastValue - firstValue;
     
     // Determine if positive change is good (for most metrics, higher is better, except loss and DB)
@@ -68,7 +61,7 @@ const MetricChart = ({
       change: Math.abs(change),
       isImproving,
       direction: change > 0 ? 'up' : 'down'
-    };
+    } as const;
   };
 
   const trend = calculateTrend();
@@ -111,11 +104,17 @@ const MetricChart = ({
                 content={({ active, payload, label }) => {
                   if (active && payload && payload.length) {
                     const value = payload[0].value;
+                    const numericValue = typeof value === 'number' ? value : 0;
+                    
                     return (
                       <div className="bg-white p-3 border rounded shadow-lg">
                         <p className="font-medium">{`Epoch: ${label}`}</p>
                         <p className="text-blue-600">
-                          {`${payload[0].name}: ${formatValue ? formatValue(value) : value.toFixed(4)}`}
+                          {`${payload[0].name}: ${
+                            formatValue 
+                              ? formatValue(numericValue) 
+                              : numericValue.toFixed(4)
+                          }`}
                         </p>
                         <p className="text-xs text-gray-500">10-epoch average</p>
                       </div>
@@ -128,7 +127,7 @@ const MetricChart = ({
                 type="monotone" 
                 dataKey={dataKey} 
                 stroke={color} 
-                strokeWidth={3}  // Slightly thicker for averaged data
+                strokeWidth={3}
                 dot={false}
                 activeDot={{ r: 5, stroke: color, strokeWidth: 2 }}
               />
@@ -139,6 +138,7 @@ const MetricChart = ({
     </Card>
   );
 };
+
 
 export default function TrainingMonitorPage() {
   const { 
