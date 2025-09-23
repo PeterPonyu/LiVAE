@@ -36,28 +36,11 @@ def calculate_qc_metrics(adata: AnnData, species: str) -> QCMetrics:
     
     # Calculate QC metrics using scanpy
     sc.pp.calculate_qc_metrics(
-        adata_temp, 
-        percent_top=None, 
-        log1p=False, 
-        inplace=True,
-        var_type='genes'
-    )
-    
-    # Extract mitochondrial and ribosomal percentages
-    sc.pp.calculate_qc_metrics(
         adata_temp,
-        qc_vars=['mt'], 
+        qc_vars=['mt', 'ribo'], 
         percent_top=None,
         log1p=False,
         inplace=True
-    )
-    
-    sc.pp.calculate_qc_metrics(
-        adata_temp,
-        qc_vars=['ribo'], 
-        percent_top=None,
-        log1p=False,
-        inplace=True  
     )
     
     def _get_stats(values: np.ndarray) -> Dict[str, float]:
@@ -77,25 +60,34 @@ def calculate_qc_metrics(adata: AnnData, species: str) -> QCMetrics:
         pct_counts_ribo=_get_stats(adata_temp.obs['pct_counts_ribo']) if 'pct_counts_ribo' in adata_temp.obs else _get_stats(np.zeros(adata_temp.n_obs))
     )
 
-def apply_qc_filtering(adata: AnnData, QCParams: QCParams) -> AnnData:
-    """Apply QC filtering based on thresholds"""
-    if QCParams is None:
+def apply_qc_filtering(adata: AnnData, qc_params: QCParams) -> AnnData:
+    if qc_params is None:
         return adata
         
-    # Create a copy for filtering
     adata_filtered = adata.copy()
     
-    # Calculate QC metrics if not present
-    if 'n_genes_by_counts' not in adata_filtered.obs.columns:
-        calculate_qc_metrics(adata_filtered, QCParams.species)  # This will add the metrics to obs
+    # Calculate QC metrics first
+    calculate_qc_metrics(adata_filtered, qc_params.species)
     
-    # Apply filters
-    sc.pp.filter_cells(adata_filtered, min_genes=QCParams.min_genes_per_cell or 0)
-    if QCParams.max_genes_per_cell:
-        sc.pp.filter_cells(adata_filtered, max_genes=QCParams.max_genes_per_cell)
+    # Apply all filters
+    if qc_params.min_genes_per_cell:
+        sc.pp.filter_cells(adata_filtered, min_genes=qc_params.min_genes_per_cell)
+    if qc_params.max_genes_per_cell:
+        sc.pp.filter_cells(adata_filtered, max_genes=qc_params.max_genes_per_cell)
+    if qc_params.min_counts_per_cell:
+        sc.pp.filter_cells(adata_filtered, min_counts=qc_params.min_counts_per_cell)
+    if qc_params.max_counts_per_cell:
+        sc.pp.filter_cells(adata_filtered, max_counts=qc_params.max_counts_per_cell)
     
-    # Additional filtering based on counts and percentages would go here    
+    # Filter by mitochondrial/ribosomal percentages
+    if qc_params.max_pct_mt and 'pct_counts_mt' in adata_filtered.obs:
+        adata_filtered = adata_filtered[adata_filtered.obs['pct_counts_mt'] < qc_params.max_pct_mt]
+    if qc_params.max_pct_ribo and 'pct_counts_ribo' in adata_filtered.obs:
+        adata_filtered = adata_filtered[adata_filtered.obs['pct_counts_ribo'] < qc_params.max_pct_ribo]
+    
     return adata_filtered
+
+
 
 def get_layer_info(data, layer_name: str, shape: ShapeInfo) -> LayerInfo:
     """Extract information about a data layer"""

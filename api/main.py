@@ -26,8 +26,8 @@ from .utils import (
 # Initialize FastAPI app
 app = FastAPI(
     title="Single Cell Deep Learning Agent",
-    description="Local single-session LiVAE training interface",
-    version="1.0.0"
+    description="LiVAE training interface",
+    version="0.1.0"
 )
 
 # Add CORS middleware for Next.js frontend
