@@ -13,6 +13,7 @@ LiVAE (Lorentzian Interpretable Variational Autoencoder) is a novel deep generat
 ```bash
 # Clone the repository
 git clone https://github.com/PeterPonyu/LiVAE.git
+
 cd LiVAE
 
 # Install dependencies
@@ -26,13 +27,12 @@ pip install -e .
 
 ```
 torch>=1.9.0
-numpy>=1.21.0
-pandas>=1.3.0
-scikit-learn>=1.0.0
-scipy>=1.7.0
-anndata>=0.8.0
-scib>=1.0.0
+scanpy>=1.8.0
 tqdm>=4.60.0
+fastapi>=0.100.0
+uvicorn>=0.23.0
+pydantic>=2.0.0,<3.0.0
+python-multipart>=0.0.6
 ```
 
 ## Quick Start
@@ -47,15 +47,15 @@ adata = sc.read_h5ad('your_data.h5ad')
 # Initialize LiVAE agent
 model = agent(
     adata=adata,
-    layer='counts',          # Data layer to use
+    layer='counts',         # Data layer to use
     latent_dim=10,          # Primary latent dimension
     i_dim=2,                # Interpretable latent dimension
     hidden_dim=128,         # Hidden layer dimension
     lr=1e-4,                # Learning rate
     # Regularization weights
     beta=1.0,               # β-VAE weight
-    lorentz=0.1,           # Lorentzian regularization
-    irecon=0.5,            # Interpretable reconstruction
+    lorentz=1.0,            # Lorentzian regularization
+    irecon=1.0,             # Interpretable reconstruction
 )
 
 # Train the model
@@ -107,73 +107,68 @@ Where:
 - **L_KL**: KL divergence
 
 
-### Hyperparameter Tuning
+# LiVAE Application
 
-```python
-# Grid search example
-hyperparams = {
-    'beta': [0.5, 1.0, 2.0],
-    'lorentz': [0.0, 0.1, 0.5],
-    'latent_dim': [10, 15, 20]
-}
+A full-stack application with FastAPI backend and Next.js frontend.
 
-results = []
-for beta in hyperparams['beta']:
-    for lorentz in hyperparams['lorentz']:
-        for latent_dim in hyperparams['latent_dim']:
-            model = agent(adata, beta=beta, lorentz=lorentz, latent_dim=latent_dim)
-            model.fit(epochs=1000)
-            
-            # Evaluate performance
-            final_scores = model.score[-1]
-            results.append({
-                'beta': beta, 'lorentz': lorentz, 'latent_dim': latent_dim,
-                'ARI': final_scores[0], 'NMI': final_scores[1]
-            })
+## 🚀 Quick Start
+
+### Prerequisites
+- **Python 3.7+** (for backend)
+- **Node.js** (for frontend static server) or **Python** (alternative)
+
+### Option 1: One-Command Start (Recommended)
+```bash
+python start_services.py
 ```
 
-## Evaluation Metrics
+### Option 2: Manual Start (Two Terminals)
 
-LiVAE provides comprehensive evaluation through multiple metrics:
+#### Terminal 1 - Start Backend
+```bash
+# Install FastAPI dependencies (if not installed)
+pip install fastapi uvicorn
 
-### Clustering Quality
-- **ARI** (Adjusted Rand Index): Clustering agreement with ground truth
-- **NMI** (Normalized Mutual Information): Information-theoretic clustering measure
-- **ASW** (Average Silhouette Width): Cluster cohesion and separation
-
-### Cluster Validity
-- **C_H** (Calinski-Harabasz): Ratio of between to within cluster variance
-- **D_B** (Davies-Bouldin): Average similarity between clusters
-- **P_C** (Graph Connectivity): Connectivity within clusters
-
-### Batch Integration
-- **cLISI**: Cluster-specific Local Inverse Simpson Index
-- **iLISI**: Integration LISI for batch mixing
-- **bASW**: Batch-corrected Average Silhouette Width
-
-## Performance Tips
-
-### Memory Optimization
-```python
-# For large datasets, reduce batch size
-model = agent(adata, percent=0.005)  # Use 0.5% of data per batch
-
-# Use CPU if GPU memory is limited
-import torch
-model = agent(adata, device=torch.device('cpu'))
+# Start the FastAPI backend from LiVAE folder
+uvicorn api.main:app --host 127.0.0.1 --port 8000 --reload
 ```
 
-### Training Efficiency
-```python
-# Progressive training with increasing regularization
-model = agent(adata, beta=0.1, lorentz=0.0)
-model.fit(epochs=500)
-
-# Increase regularization for fine-tuning
-model.beta = 1.0
-model.lorentz = 0.1
-model.fit(epochs=500)
+#### Terminal 2 - Start Frontend
+```bash
+npx serve frontend/outs -p 3000
 ```
+
+## 🔧 Installation
+
+### Backend Dependencies
+```bash
+pip install fastapi uvicorn
+```
+
+### Frontend Server (Choose One)
+```bash
+npm install -g serve
+```
+
+## 📞 Quick Commands Reference
+
+```bash
+# Start everything (from LiVAE folder)
+python start_services.py
+
+# Start backend only (from LiVAE folder)
+uvicorn api.main:app --host 127.0.0.1 --port 8000 --reload
+
+# Start frontend only (from LiVAE folder)
+npx serve frontend/outs -p 3000
+
+# Stop all (Ctrl+C in terminals or):
+pkill -f uvicorn
+pkill -f "python.*http.server"
+```
+
+🎉 **Ready to go!** Start the services and visit http://127.0.0.1:3000
+
 
 ## License
 
