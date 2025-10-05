@@ -187,4 +187,10 @@ export const DEFAULT_TRAINING_CONFIG: TrainingConfig = {
 
 export const DEFAULT_QC_PARAMS: QCParams = {
   species: 'human',
+  min_genes_per_cell: 200,
+  max_genes_per_cell: 5000,
+  min_counts_per_cell: 500,
+  max_counts_per_cell: 50000,
+  max_pct_mt: 20,
+  max_pct_ribo: 50,
 };

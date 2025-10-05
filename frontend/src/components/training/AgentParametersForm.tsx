@@ -4,13 +4,7 @@
 
 import React from 'react';
 import { UseFormReturn } from 'react-hook-form';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Slider } from '@/components/ui/slider';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
+import { Info, Layers, Network, Sliders, Zap } from 'lucide-react';
 import type { TrainingFormData } from '@/lib/validation/training-schemas';
 
 interface AgentParametersFormProps {
@@ -18,314 +12,419 @@ interface AgentParametersFormProps {
   availableLayers: string[];
 }
 
+/**
+ * Slider field component for loss weights and training parameters
+ */
+const SliderField: React.FC<{
+  label: string;
+  value: number;
+  defaultValue: number;
+  min: number;
+  max: number;
+  step: number;
+  description: string;
+  formatValue?: (val: number) => string;
+  onChange: (value: number) => void;
+  error?: string;
+}> = ({ label, value, defaultValue, min, max, step, description, formatValue, onChange, error }) => {
+  const displayValue = formatValue ? formatValue(value ?? defaultValue) : (value ?? defaultValue).toFixed(1);
+  
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <label className="text-sm font-medium text-gray-900 dark:text-gray-100">
+          {label}
+        </label>
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-mono font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 min-w-[4rem] justify-center tabular-nums">
+          {displayValue}
+        </span>
+      </div>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={value ?? defaultValue}
+        onChange={(e) => onChange(parseFloat(e.target.value))}
+        title='Slider input'
+        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 accent-blue-600 hover:accent-blue-700"
+      />
+      <p className="text-xs text-gray-600 dark:text-gray-400">
+        {description}
+      </p>
+      {error && (
+        <p className="text-xs text-red-600 dark:text-red-400 flex items-center gap-1">
+          <Info className="w-3 h-3" />
+          {error}
+        </p>
+      )}
+    </div>
+  );
+};
+
+/**
+ * Number input field component
+ */
+const NumberInput: React.FC<{
+  label: string;
+  value: number | undefined;
+  min: number;
+  max: number;
+  placeholder?: string;
+  description: string;
+  onChange: (value: number) => void;
+  error?: string;
+}> = ({ label, value, min, max, placeholder, description, onChange, error }) => {
+  return (
+    <div className="space-y-2">
+      <label className="text-sm font-medium text-gray-900 dark:text-gray-100">
+        {label}
+      </label>
+      <input
+        type="number"
+        min={min}
+        max={max}
+        step={1}
+        placeholder={placeholder}
+        value={value ?? ''}
+        onChange={(e) => {
+          const val = parseInt(e.target.value, 10);
+          if (!isNaN(val)) onChange(val);
+        }}
+        className="w-full px-3 py-2 text-sm font-mono bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:text-gray-100"
+      />
+      <p className="text-xs text-gray-600 dark:text-gray-400">
+        {description}
+      </p>
+      {error && (
+        <p className="text-xs text-red-600 dark:text-red-400 flex items-center gap-1">
+          <Info className="w-3 h-3" />
+          {error}
+        </p>
+      )}
+    </div>
+  );
+};
+
+/**
+ * Select field component
+ */
+const SelectField: React.FC<{
+  label: string;
+  value: string;
+  options: { value: string; label: string }[];
+  description: string;
+  onChange: (value: string) => void;
+  error?: string;
+}> = ({ label, value, options, description, onChange, error }) => {
+  return (
+    <div className="space-y-2">
+      <label className="text-sm font-medium text-gray-900 dark:text-gray-100">
+        {label}
+      </label>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        title='Select data layer'
+        className="w-full px-3 py-2 text-sm bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:text-gray-100 cursor-pointer"
+      >
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+      <p className="text-xs text-gray-600 dark:text-gray-400">
+        {description}
+      </p>
+      {error && (
+        <p className="text-xs text-red-600 dark:text-red-400 flex items-center gap-1">
+          <Info className="w-3 h-3" />
+          {error}
+        </p>
+      )}
+    </div>
+  );
+};
+
+/**
+ * Badge component
+ */
+const Badge: React.FC<{ children: React.ReactNode; variant?: 'default' | 'secondary' }> = ({ 
+  children, 
+  variant = 'default' 
+}) => {
+  const classes = variant === 'secondary'
+    ? 'inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
+    : 'inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+  
+  return <span className={classes}>{children}</span>;
+};
+
+/**
+ * Section header component
+ */
+const SectionHeader: React.FC<{ 
+  icon: React.ReactNode; 
+  title: string; 
+  badge?: string;
+}> = ({ icon, title, badge }) => {
+  return (
+    <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2">
+        {icon}
+        <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">{title}</h4>
+      </div>
+      {badge && <Badge variant="secondary">{badge}</Badge>}
+    </div>
+  );
+};
+
+/**
+ * Form component for configuring LiVAE model parameters and training hyperparameters
+ */
 export const AgentParametersForm: React.FC<AgentParametersFormProps> = ({
   form,
   availableLayers,
 }) => {
-  // Helper to format scientific notation for learning rate
-  const formatLearningRate = (value: number): string => {
-    return value.toExponential(1);
-  };
+  const { register, watch, setValue, formState: { errors } } = form;
+  
+  // Get form values
+  const formValues = watch('agent_parameters');
+  
+  // Convert learning rate from linear slider to logarithmic scale
+  const lrToSlider = (lr: number): number => Math.log10(lr);
+  const sliderToLr = (val: number): number => Math.pow(10, val);
+  const formatLr = (lr: number): string => lr.toExponential(1);
+
+  // Layer options
+  const layerOptions = availableLayers.map(layer => ({
+    value: layer,
+    label: layer === 'X' ? 'X (Main Layer)' : layer
+  }));
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Model Parameters</CardTitle>
-        <CardDescription>
+    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg shadow-sm">
+      {/* Card Header */}
+      <div className="px-6 py-5 border-b border-gray-200 dark:border-gray-800">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          Model Parameters
+        </h3>
+        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
           Configure the LiVAE model architecture and training hyperparameters
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Data Layer Selection */}
-        <FormField
-          control={form.control}
-          name="agent_parameters.layer"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Data Layer</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select data layer to use" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {availableLayers.map((layer) => (
-                    <SelectItem key={layer} value={layer}>
-                      {layer === 'X' ? 'X (Main Layer)' : layer}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormDescription>
-                Choose which data layer to use for training
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
+        </p>
+      </div>
+      
+      {/* Card Content */}
+      <div className="px-6 py-6 space-y-8">
+        {/* ========== Data Layer Selection ========== */}
+        <SelectField
+          label="Data Layer"
+          value={formValues?.layer || 'X'}
+          options={layerOptions}
+          description="Choose which data layer to use for training the model"
+          onChange={(value) => setValue('agent_parameters.layer', value)}
+          error={errors.agent_parameters?.layer?.message}
         />
 
-        <Separator />
+        <hr className="border-gray-200 dark:border-gray-700" />
 
-        {/* Architecture Parameters */}
+        {/* ========== Architecture Parameters ========== */}
         <div className="space-y-4">
-          <div className="flex items-center space-x-2">
-            <h4 className="font-medium">Architecture</h4>
-            <Badge variant="outline">Network Dimensions</Badge>
-          </div>
+          <SectionHeader 
+            icon={<Network className="w-4 h-4 text-gray-600 dark:text-gray-400" />}
+            title="Architecture" 
+            badge="Network Dimensions"
+          />
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <FormField
-              control={form.control}
-              name="agent_parameters.hidden_dim"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Hidden Dimension</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      {...field}
-                      onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                    />
-                  </FormControl>
-                  <FormDescription>Encoder/decoder width</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
+            {/* Hidden Dimension */}
+            <NumberInput
+              label="Hidden Dimension"
+              value={formValues?.hidden_dim}
+              min={16}
+              max={1024}
+              placeholder="128"
+              description="Width of encoder and decoder layers"
+              onChange={(value) => setValue('agent_parameters.hidden_dim', value)}
+              error={errors.agent_parameters?.hidden_dim?.message}
             />
 
-            <FormField
-              control={form.control}
-              name="agent_parameters.latent_dim"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Latent Dimension</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      {...field}
-                      onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                    />
-                  </FormControl>
-                  <FormDescription>Latent space size</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
+            {/* Latent Dimension */}
+            <NumberInput
+              label="Latent Dimension"
+              value={formValues?.latent_dim}
+              min={2}
+              max={100}
+              placeholder="10"
+              description="Size of the latent space representation"
+              onChange={(value) => setValue('agent_parameters.latent_dim', value)}
+              error={errors.agent_parameters?.latent_dim?.message}
             />
 
-            <FormField
-              control={form.control}
-              name="agent_parameters.i_dim"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Interpretable Dimension</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      {...field}
-                      onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                    />
-                  </FormControl>
-                  <FormDescription>Interpretable embedding size</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
+            {/* Interpretable Dimension */}
+            <NumberInput
+              label="Interpretable Dim"
+              value={formValues?.i_dim}
+              min={2}
+              max={50}
+              placeholder="5"
+              description="Size of interpretable embedding space"
+              onChange={(value) => setValue('agent_parameters.i_dim', value)}
+              error={errors.agent_parameters?.i_dim?.message}
             />
           </div>
         </div>
 
-        <Separator />
+        <hr className="border-gray-200 dark:border-gray-700" />
 
-        {/* Loss Weights */}
-        <div className="space-y-4">
-          <div className="flex items-center space-x-2">
-            <h4 className="font-medium">Loss Weights</h4>
-            <Badge variant="outline">Regularization</Badge>
-          </div>
+        {/* ========== Loss Weights ========== */}
+        <div className="space-y-6">
+          <SectionHeader 
+            icon={<Sliders className="w-4 h-4 text-gray-600 dark:text-gray-400" />}
+            title="Loss Weights" 
+            badge="Regularization"
+          />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <FormField
-              control={form.control}
-              name="agent_parameters.beta"
-              render={({ field }) => (
-                <FormItem className="space-y-3">
-                  <FormLabel>Beta (β-VAE Weight): {field.value}</FormLabel>
-                  <FormControl>
-                    <Slider
-                      min={0.1}
-                      max={10}
-                      step={0.1}
-                      value={[field.value]}
-                      onValueChange={(values) => field.onChange(values[0])}
-                    />
-                  </FormControl>
-                  <FormDescription>KL divergence weight</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-6">
+            {/* Beta (β-VAE) */}
+            <SliderField
+              label="Beta (β-VAE)"
+              value={formValues?.beta}
+              defaultValue={1.0}
+              min={0.1}
+              max={10}
+              step={0.1}
+              description="KL divergence weight for disentanglement"
+              onChange={(value) => setValue('agent_parameters.beta', value)}
+              error={errors.agent_parameters?.beta?.message}
             />
 
-            <FormField
-              control={form.control}
-              name="agent_parameters.irecon"
-              render={({ field }) => (
-                <FormItem className="space-y-3">
-                  <FormLabel>Interpretable Reconstruction: {field.value}</FormLabel>
-                  <FormControl>
-                    <Slider
-                      min={0}
-                      max={10}
-                      step={0.1}
-                      value={[field.value]}
-                      onValueChange={(values) => field.onChange(values[0])}
-                    />
-                  </FormControl>
-                  <FormDescription>Interpretable embedding reconstruction weight</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
+            {/* Interpretable Reconstruction */}
+            <SliderField
+              label="Interpretable Recon"
+              value={formValues?.irecon}
+              defaultValue={0.0}
+              min={0}
+              max={10}
+              step={0.1}
+              description="Weight for embedding reconstruction loss"
+              onChange={(value) => setValue('agent_parameters.irecon', value)}
+              error={errors.agent_parameters?.irecon?.message}
             />
 
-            <FormField
-              control={form.control}
-              name="agent_parameters.lorentz"
-              render={({ field }) => (
-                <FormItem className="space-y-3">
-                  <FormLabel>Lorentz Distance: {field.value}</FormLabel>
-                  <FormControl>
-                    <Slider
-                      min={0}
-                      max={10}
-                      step={0.1}
-                      value={[field.value]}
-                      onValueChange={(values) => field.onChange(values[0])}
-                    />
-                  </FormControl>
-                  <FormDescription>Hyperbolic geometry regularization</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
+            {/* Lorentz Distance */}
+            <SliderField
+              label="Lorentz Distance"
+              value={formValues?.lorentz}
+              defaultValue={0.0}
+              min={0}
+              max={10}
+              step={0.1}
+              description="Hyperbolic geometry regularization penalty"
+              onChange={(value) => setValue('agent_parameters.lorentz', value)}
+              error={errors.agent_parameters?.lorentz?.message}
             />
 
-            <FormField
-              control={form.control}
-              name="agent_parameters.dip"
-              render={({ field }) => (
-                <FormItem className="space-y-3">
-                  <FormLabel>DIP-VAE: {field.value}</FormLabel>
-                  <FormControl>
-                    <Slider
-                      min={0}
-                      max={10}
-                      step={0.1}
-                      value={[field.value]}
-                      onValueChange={(values) => field.onChange(values[0])}
-                    />
-                  </FormControl>
-                  <FormDescription>Disentangled inferred prior weight</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
+            {/* DIP-VAE */}
+            <SliderField
+              label="DIP-VAE"
+              value={formValues?.dip}
+              defaultValue={0.0}
+              min={0}
+              max={10}
+              step={0.1}
+              description="Disentangled inferred prior weight"
+              onChange={(value) => setValue('agent_parameters.dip', value)}
+              error={errors.agent_parameters?.dip?.message}
             />
 
-            <FormField
-              control={form.control}
-              name="agent_parameters.tc"
-              render={({ field }) => (
-                <FormItem className="space-y-3">
-                  <FormLabel>Total Correlation: {field.value}</FormLabel>
-                  <FormControl>
-                    <Slider
-                      min={0}
-                      max={10}
-                      step={0.1}
-                      value={[field.value]}
-                      onValueChange={(values) => field.onChange(values[0])}
-                    />
-                  </FormControl>
-                  <FormDescription>β-TC-VAE total correlation penalty</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
+            {/* Total Correlation */}
+            <SliderField
+              label="Total Correlation"
+              value={formValues?.tc}
+              defaultValue={0.0}
+              min={0}
+              max={10}
+              step={0.1}
+              description="β-TC-VAE total correlation penalty"
+              onChange={(value) => setValue('agent_parameters.tc', value)}
+              error={errors.agent_parameters?.tc?.message}
             />
 
-            <FormField
-              control={form.control}
-              name="agent_parameters.info"
-              render={({ field }) => (
-                <FormItem className="space-y-3">
-                  <FormLabel>Mutual Information: {field.value}</FormLabel>
-                  <FormControl>
-                    <Slider
-                      min={0}
-                      max={10}
-                      step={0.1}
-                      value={[field.value]}
-                      onValueChange={(values) => field.onChange(values[0])}
-                    />
-                  </FormControl>
-                  <FormDescription>Mutual information penalty weight</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
+            {/* Mutual Information */}
+            <SliderField
+              label="Mutual Information"
+              value={formValues?.info}
+              defaultValue={0.0}
+              min={0}
+              max={10}
+              step={0.1}
+              description="Mutual information penalty weight"
+              onChange={(value) => setValue('agent_parameters.info', value)}
+              error={errors.agent_parameters?.info?.message}
             />
           </div>
         </div>
 
-        <Separator />
+        <hr className="border-gray-200 dark:border-gray-700" />
 
-        {/* Training Parameters */}
-        <div className="space-y-4">
-          <div className="flex items-center space-x-2">
-            <h4 className="font-medium">Training</h4>
-            <Badge variant="outline">Optimization</Badge>
-          </div>
+        {/* ========== Training Parameters ========== */}
+        <div className="space-y-6">
+          <SectionHeader 
+            icon={<Zap className="w-4 h-4 text-gray-600 dark:text-gray-400" />}
+            title="Training" 
+            badge="Optimization"
+          />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <FormField
-              control={form.control}
-              name="agent_parameters.lr"
-              render={({ field }) => (
-                <FormItem className="space-y-3">
-                  <FormLabel>Learning Rate: {formatLearningRate(field.value)}</FormLabel>
-                  <FormControl>
-                    <Slider
-                      min={1e-6}
-                      max={1e-1}
-                      step={1e-6}
-                      value={[field.value]}
-                      onValueChange={(values) => field.onChange(values[0])}
-                    />
-                  </FormControl>
-                  <FormDescription>Adam optimizer learning rate</FormDescription>
-                  <FormMessage />
-                </FormItem>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-6">
+            {/* Learning Rate (Logarithmic Scale) */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                  Learning Rate
+                </label>
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-mono font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 min-w-[4rem] justify-center tabular-nums">
+                  {formatLr(formValues?.lr ?? 1e-3)}
+                </span>
+              </div>
+              <input
+                type="range"
+                min={-6}
+                max={-1}
+                step={0.1}
+                value={lrToSlider(formValues?.lr ?? 1e-3)}
+                onChange={(e) => setValue('agent_parameters.lr', sliderToLr(parseFloat(e.target.value)))}
+                title='Slider input'
+                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 accent-blue-600 hover:accent-blue-700"
+              />
+              <p className="text-xs text-gray-600 dark:text-gray-400">
+                Adam optimizer learning rate (logarithmic scale)
+              </p>
+              {errors.agent_parameters?.lr?.message && (
+                <p className="text-xs text-red-600 dark:text-red-400 flex items-center gap-1">
+                  <Info className="w-3 h-3" />
+                  {errors.agent_parameters.lr.message}
+                </p>
               )}
-            />
+            </div>
 
-            <FormField
-              control={form.control}
-              name="agent_parameters.percent"
-              render={({ field }) => (
-                <FormItem className="space-y-3">
-                  <FormLabel>Data Percentage: {(field.value * 100).toFixed(1)}%</FormLabel>
-                  <FormControl>
-                    <Slider
-                      min={0.001}
-                      max={1.0}
-                      step={0.001}
-                      value={[field.value]}
-                      onValueChange={(values) => field.onChange(values[0])}
-                    />
-                  </FormControl>
-                  <FormDescription>Fraction of data to use for training</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
+            {/* Data Percentage */}
+            <SliderField
+              label="Data Percentage"
+              value={formValues?.percent}
+              defaultValue={1.0}
+              min={0.01}
+              max={1.0}
+              step={0.01}
+              description="Fraction of dataset to use for training"
+              formatValue={(val) => `${(val * 100).toFixed(0)}%`}
+              onChange={(value) => setValue('agent_parameters.percent', value)}
+              error={errors.agent_parameters?.percent?.message}
             />
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };

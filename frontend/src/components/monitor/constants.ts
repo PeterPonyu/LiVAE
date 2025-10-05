@@ -1,18 +1,5 @@
 // ========================================
-// src/app/training/monitor/page.tsx
-// ========================================
-'use client';
-
-import React from 'react';
-import { TrainingMonitor } from '@/components/monitor/TrainingMonitor';
-
-export default function TrainingMonitorPage() {
-  return <TrainingMonitor />;
-}
-
-
-// ========================================
-// src/components/training/monitor/constants.ts
+// src/components/monitor/constants.ts
 // ========================================
 export const METRICS_CONFIG = {
   loss: { color: '#dc2626', label: 'Loss', betterDirection: 'down' },
