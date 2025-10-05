@@ -108,7 +108,16 @@ export const TrainingConfigForm: React.FC = () => {
     <>
       <DatasetSummaryCard dataSummary={dataSummary} />
 
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form 
+        onSubmit={form.handleSubmit(onSubmit)} 
+        className="space-y-6"
+        onKeyDown={(e) => {
+          // Prevent Enter key from submitting form when editing fields
+          if (e.key === 'Enter' && e.target !== e.currentTarget) {
+            e.preventDefault();
+          }
+        }}
+      >
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList>
@@ -202,10 +211,17 @@ const Button: React.FC<{
     outline: "bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:ring-blue-500"
   };
 
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (type === 'button') {
+      e.preventDefault(); // Prevent form submission for type="button"
+    }
+    onClick?.();
+  };
+
   return (
     <button
       type={type}
-      onClick={onClick}
+      onClick={handleClick}
       disabled={disabled}
       className={`${baseStyles} ${variantStyles[variant]}`}
     >
@@ -301,10 +317,16 @@ const TabsTrigger: React.FC<{
   const { value: activeValue, onValueChange } = useTabsContext();
   const active = value === activeValue;
 
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault(); 
+    e.stopPropagation();
+    onValueChange(value);
+  };
+
   return (
     <button
       type="button"
-      onClick={() => onValueChange(value)}
+      onClick={handleClick}
       className={`px-3 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
         active
           ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm'

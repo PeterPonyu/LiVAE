@@ -2,9 +2,9 @@
 // src/components/training/AgentParametersForm.tsx
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { UseFormReturn } from 'react-hook-form';
-import { Info, Layers, Network, Sliders, Zap } from 'lucide-react';
+import { Info, Layers, Network, Sliders, Zap, ChevronDown, ChevronUp } from 'lucide-react';
 import type { TrainingFormData } from '@/lib/validation/training-schemas';
 
 interface AgentParametersFormProps {
@@ -162,21 +162,36 @@ const Badge: React.FC<{ children: React.ReactNode; variant?: 'default' | 'second
 };
 
 /**
- * Section header component
+ * Collapsible section header component
  */
 const SectionHeader: React.FC<{ 
   icon: React.ReactNode; 
   title: string; 
   badge?: string;
-}> = ({ icon, title, badge }) => {
+  isCollapsed: boolean;
+  onToggle: () => void;
+}> = ({ icon, title, badge, isCollapsed, onToggle }) => {
   return (
-    <div className="flex items-center gap-2">
+    <button
+      type="button"
+      onClick={onToggle}
+      className="w-full flex items-center justify-between group hover:bg-gray-50 dark:hover:bg-gray-800/50 -mx-2 px-2 py-2 rounded-md transition-colors"
+    >
       <div className="flex items-center gap-2">
-        {icon}
-        <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">{title}</h4>
+        <div className="flex items-center gap-2">
+          {icon}
+          <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">{title}</h4>
+        </div>
+        {badge && <Badge variant="secondary">{badge}</Badge>}
       </div>
-      {badge && <Badge variant="secondary">{badge}</Badge>}
-    </div>
+      <div className="text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors">
+        {isCollapsed ? (
+          <ChevronDown className="w-4 h-4" />
+        ) : (
+          <ChevronUp className="w-4 h-4" />
+        )}
+      </div>
+    </button>
   );
 };
 
@@ -191,6 +206,32 @@ export const AgentParametersForm: React.FC<AgentParametersFormProps> = ({
   
   // Get form values
   const formValues = watch('agent_parameters');
+  
+  // Collapse state for each section
+  const [collapsed, setCollapsed] = useState({
+    dataLayer: false,
+    architecture: false,
+    lossWeights: false,
+    training: false,
+  });
+
+  // Toggle individual section
+  const toggleSection = (section: keyof typeof collapsed) => {
+    setCollapsed(prev => ({ ...prev, [section]: !prev[section] }));
+  };
+
+  // Toggle all sections
+  const toggleAll = () => {
+    const allCollapsed = Object.values(collapsed).every(v => v);
+    setCollapsed({
+      dataLayer: !allCollapsed,
+      architecture: !allCollapsed,
+      lossWeights: !allCollapsed,
+      training: !allCollapsed,
+    });
+  };
+
+  const allCollapsed = Object.values(collapsed).every(v => v);
   
   // Convert learning rate from linear slider to logarithmic scale
   const lrToSlider = (lr: number): number => Math.log10(lr);
@@ -207,25 +248,58 @@ export const AgentParametersForm: React.FC<AgentParametersFormProps> = ({
     <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg shadow-sm">
       {/* Card Header */}
       <div className="px-6 py-5 border-b border-gray-200 dark:border-gray-800">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-          Model Parameters
-        </h3>
-        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-          Configure the LiVAE model architecture and training hyperparameters
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              Model Parameters
+            </h3>
+            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+              Configure the LiVAE model architecture and training hyperparameters
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={toggleAll}
+            className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md transition-colors"
+          >
+            {allCollapsed ? (
+              <>
+                <ChevronDown className="w-4 h-4" />
+                Expand All
+              </>
+            ) : (
+              <>
+                <ChevronUp className="w-4 h-4" />
+                Collapse All
+              </>
+            )}
+          </button>
+        </div>
       </div>
       
       {/* Card Content */}
       <div className="px-6 py-6 space-y-8">
         {/* ========== Data Layer Selection ========== */}
-        <SelectField
-          label="Data Layer"
-          value={formValues?.layer || 'X'}
-          options={layerOptions}
-          description="Choose which data layer to use for training the model"
-          onChange={(value) => setValue('agent_parameters.layer', value)}
-          error={errors.agent_parameters?.layer?.message}
-        />
+        <div className="space-y-4">
+          <SectionHeader 
+            icon={<Layers className="w-4 h-4 text-gray-600 dark:text-gray-400" />}
+            title="Data Layer"
+            badge="Input Source"
+            isCollapsed={collapsed.dataLayer}
+            onToggle={() => toggleSection('dataLayer')}
+          />
+          
+          {!collapsed.dataLayer && (
+            <SelectField
+              label="Data Layer"
+              value={formValues?.layer || 'X'}
+              options={layerOptions}
+              description="Choose which data layer to use for training the model"
+              onChange={(value) => setValue('agent_parameters.layer', value)}
+              error={errors.agent_parameters?.layer?.message}
+            />
+          )}
+        </div>
 
         <hr className="border-gray-200 dark:border-gray-700" />
 
@@ -235,45 +309,49 @@ export const AgentParametersForm: React.FC<AgentParametersFormProps> = ({
             icon={<Network className="w-4 h-4 text-gray-600 dark:text-gray-400" />}
             title="Architecture" 
             badge="Network Dimensions"
+            isCollapsed={collapsed.architecture}
+            onToggle={() => toggleSection('architecture')}
           />
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Hidden Dimension */}
-            <NumberInput
-              label="Hidden Dimension"
-              value={formValues?.hidden_dim}
-              min={16}
-              max={1024}
-              placeholder="128"
-              description="Width of encoder and decoder layers"
-              onChange={(value) => setValue('agent_parameters.hidden_dim', value)}
-              error={errors.agent_parameters?.hidden_dim?.message}
-            />
+          {!collapsed.architecture && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Hidden Dimension */}
+              <NumberInput
+                label="Hidden Dimension"
+                value={formValues?.hidden_dim}
+                min={16}
+                max={1024}
+                placeholder="128"
+                description="Width of encoder and decoder layers"
+                onChange={(value) => setValue('agent_parameters.hidden_dim', value)}
+                error={errors.agent_parameters?.hidden_dim?.message}
+              />
 
-            {/* Latent Dimension */}
-            <NumberInput
-              label="Latent Dimension"
-              value={formValues?.latent_dim}
-              min={2}
-              max={100}
-              placeholder="10"
-              description="Size of the latent space representation"
-              onChange={(value) => setValue('agent_parameters.latent_dim', value)}
-              error={errors.agent_parameters?.latent_dim?.message}
-            />
+              {/* Latent Dimension */}
+              <NumberInput
+                label="Latent Dimension"
+                value={formValues?.latent_dim}
+                min={2}
+                max={100}
+                placeholder="10"
+                description="Size of the latent space representation"
+                onChange={(value) => setValue('agent_parameters.latent_dim', value)}
+                error={errors.agent_parameters?.latent_dim?.message}
+              />
 
-            {/* Interpretable Dimension */}
-            <NumberInput
-              label="Interpretable Dim"
-              value={formValues?.i_dim}
-              min={2}
-              max={50}
-              placeholder="5"
-              description="Size of interpretable embedding space"
-              onChange={(value) => setValue('agent_parameters.i_dim', value)}
-              error={errors.agent_parameters?.i_dim?.message}
-            />
-          </div>
+              {/* Interpretable Dimension */}
+              <NumberInput
+                label="Interpretable Dim"
+                value={formValues?.i_dim}
+                min={2}
+                max={50}
+                placeholder="5"
+                description="Size of interpretable embedding space"
+                onChange={(value) => setValue('agent_parameters.i_dim', value)}
+                error={errors.agent_parameters?.i_dim?.message}
+              />
+            </div>
+          )}
         </div>
 
         <hr className="border-gray-200 dark:border-gray-700" />
@@ -284,87 +362,91 @@ export const AgentParametersForm: React.FC<AgentParametersFormProps> = ({
             icon={<Sliders className="w-4 h-4 text-gray-600 dark:text-gray-400" />}
             title="Loss Weights" 
             badge="Regularization"
+            isCollapsed={collapsed.lossWeights}
+            onToggle={() => toggleSection('lossWeights')}
           />
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-6">
-            {/* Beta (β-VAE) */}
-            <SliderField
-              label="Beta (β-VAE)"
-              value={formValues?.beta}
-              defaultValue={1.0}
-              min={0.1}
-              max={10}
-              step={0.1}
-              description="KL divergence weight for disentanglement"
-              onChange={(value) => setValue('agent_parameters.beta', value)}
-              error={errors.agent_parameters?.beta?.message}
-            />
+          {!collapsed.lossWeights && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-6">
+              {/* Beta (β-VAE) */}
+              <SliderField
+                label="Beta (β-VAE)"
+                value={formValues?.beta}
+                defaultValue={1.0}
+                min={0.1}
+                max={10}
+                step={0.1}
+                description="KL divergence weight for disentanglement"
+                onChange={(value) => setValue('agent_parameters.beta', value)}
+                error={errors.agent_parameters?.beta?.message}
+              />
 
-            {/* Interpretable Reconstruction */}
-            <SliderField
-              label="Interpretable Recon"
-              value={formValues?.irecon}
-              defaultValue={0.0}
-              min={0}
-              max={10}
-              step={0.1}
-              description="Weight for embedding reconstruction loss"
-              onChange={(value) => setValue('agent_parameters.irecon', value)}
-              error={errors.agent_parameters?.irecon?.message}
-            />
+              {/* Interpretable Reconstruction */}
+              <SliderField
+                label="Interpretable Recon"
+                value={formValues?.irecon}
+                defaultValue={0.0}
+                min={0}
+                max={10}
+                step={0.1}
+                description="Weight for embedding reconstruction loss"
+                onChange={(value) => setValue('agent_parameters.irecon', value)}
+                error={errors.agent_parameters?.irecon?.message}
+              />
 
-            {/* Lorentz Distance */}
-            <SliderField
-              label="Lorentz Distance"
-              value={formValues?.lorentz}
-              defaultValue={0.0}
-              min={0}
-              max={10}
-              step={0.1}
-              description="Hyperbolic geometry regularization penalty"
-              onChange={(value) => setValue('agent_parameters.lorentz', value)}
-              error={errors.agent_parameters?.lorentz?.message}
-            />
+              {/* Lorentz Distance */}
+              <SliderField
+                label="Lorentz Distance"
+                value={formValues?.lorentz}
+                defaultValue={0.0}
+                min={0}
+                max={10}
+                step={0.1}
+                description="Hyperbolic geometry regularization penalty"
+                onChange={(value) => setValue('agent_parameters.lorentz', value)}
+                error={errors.agent_parameters?.lorentz?.message}
+              />
 
-            {/* DIP-VAE */}
-            <SliderField
-              label="DIP-VAE"
-              value={formValues?.dip}
-              defaultValue={0.0}
-              min={0}
-              max={10}
-              step={0.1}
-              description="Disentangled inferred prior weight"
-              onChange={(value) => setValue('agent_parameters.dip', value)}
-              error={errors.agent_parameters?.dip?.message}
-            />
+              {/* DIP-VAE */}
+              <SliderField
+                label="DIP-VAE"
+                value={formValues?.dip}
+                defaultValue={0.0}
+                min={0}
+                max={10}
+                step={0.1}
+                description="Disentangled inferred prior weight"
+                onChange={(value) => setValue('agent_parameters.dip', value)}
+                error={errors.agent_parameters?.dip?.message}
+              />
 
-            {/* Total Correlation */}
-            <SliderField
-              label="Total Correlation"
-              value={formValues?.tc}
-              defaultValue={0.0}
-              min={0}
-              max={10}
-              step={0.1}
-              description="β-TC-VAE total correlation penalty"
-              onChange={(value) => setValue('agent_parameters.tc', value)}
-              error={errors.agent_parameters?.tc?.message}
-            />
+              {/* Total Correlation */}
+              <SliderField
+                label="Total Correlation"
+                value={formValues?.tc}
+                defaultValue={0.0}
+                min={0}
+                max={10}
+                step={0.1}
+                description="β-TC-VAE total correlation penalty"
+                onChange={(value) => setValue('agent_parameters.tc', value)}
+                error={errors.agent_parameters?.tc?.message}
+              />
 
-            {/* Mutual Information */}
-            <SliderField
-              label="Mutual Information"
-              value={formValues?.info}
-              defaultValue={0.0}
-              min={0}
-              max={10}
-              step={0.1}
-              description="Mutual information penalty weight"
-              onChange={(value) => setValue('agent_parameters.info', value)}
-              error={errors.agent_parameters?.info?.message}
-            />
-          </div>
+              {/* Mutual Information */}
+              <SliderField
+                label="Mutual Information"
+                value={formValues?.info}
+                defaultValue={0.0}
+                min={0}
+                max={10}
+                step={0.1}
+                description="Mutual information penalty weight"
+                onChange={(value) => setValue('agent_parameters.info', value)}
+                error={errors.agent_parameters?.info?.message}
+              />
+            </div>
+          )}
         </div>
 
         <hr className="border-gray-200 dark:border-gray-700" />
@@ -375,54 +457,58 @@ export const AgentParametersForm: React.FC<AgentParametersFormProps> = ({
             icon={<Zap className="w-4 h-4 text-gray-600 dark:text-gray-400" />}
             title="Training" 
             badge="Optimization"
+            isCollapsed={collapsed.training}
+            onToggle={() => toggleSection('training')}
           />
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-6">
-            {/* Learning Rate (Logarithmic Scale) */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                  Learning Rate
-                </label>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-mono font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 min-w-[4rem] justify-center tabular-nums">
-                  {formatLr(formValues?.lr ?? 1e-3)}
-                </span>
-              </div>
-              <input
-                type="range"
-                min={-6}
-                max={-1}
-                step={0.1}
-                value={lrToSlider(formValues?.lr ?? 1e-3)}
-                onChange={(e) => setValue('agent_parameters.lr', sliderToLr(parseFloat(e.target.value)))}
-                title='Slider input'
-                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 accent-blue-600 hover:accent-blue-700"
-              />
-              <p className="text-xs text-gray-600 dark:text-gray-400">
-                Adam optimizer learning rate (logarithmic scale)
-              </p>
-              {errors.agent_parameters?.lr?.message && (
-                <p className="text-xs text-red-600 dark:text-red-400 flex items-center gap-1">
-                  <Info className="w-3 h-3" />
-                  {errors.agent_parameters.lr.message}
+          {!collapsed.training && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-6">
+              {/* Learning Rate (Logarithmic Scale) */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                    Learning Rate
+                  </label>
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-mono font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 min-w-[4rem] justify-center tabular-nums">
+                    {formatLr(formValues?.lr ?? 1e-3)}
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min={-6}
+                  max={-1}
+                  step={0.1}
+                  value={lrToSlider(formValues?.lr ?? 1e-3)}
+                  onChange={(e) => setValue('agent_parameters.lr', sliderToLr(parseFloat(e.target.value)))}
+                  title='Slider input'
+                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 accent-blue-600 hover:accent-blue-700"
+                />
+                <p className="text-xs text-gray-600 dark:text-gray-400">
+                  Adam optimizer learning rate (logarithmic scale)
                 </p>
-              )}
-            </div>
+                {errors.agent_parameters?.lr?.message && (
+                  <p className="text-xs text-red-600 dark:text-red-400 flex items-center gap-1">
+                    <Info className="w-3 h-3" />
+                    {errors.agent_parameters.lr.message}
+                  </p>
+                )}
+              </div>
 
-            {/* Data Percentage */}
-            <SliderField
-              label="Data Percentage"
-              value={formValues?.percent}
-              defaultValue={1.0}
-              min={0.01}
-              max={1.0}
-              step={0.01}
-              description="Fraction of dataset to use for training"
-              formatValue={(val) => `${(val * 100).toFixed(0)}%`}
-              onChange={(value) => setValue('agent_parameters.percent', value)}
-              error={errors.agent_parameters?.percent?.message}
-            />
-          </div>
+              {/* Data Percentage */}
+              <SliderField
+                label="Data Percentage"
+                value={formValues?.percent}
+                defaultValue={1.0}
+                min={0.01}
+                max={1.0}
+                step={0.01}
+                description="Fraction of dataset to use for training"
+                formatValue={(val) => `${(val * 100).toFixed(0)}%`}
+                onChange={(value) => setValue('agent_parameters.percent', value)}
+                error={errors.agent_parameters?.percent?.message}
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>
