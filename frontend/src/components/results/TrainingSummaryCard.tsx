@@ -1,11 +1,8 @@
-
+// ========================================
 // src/components/results/TrainingSummaryCard.tsx
-'use client';
-
+// ========================================
 import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, Badge, Progress } from './ui';
 import type { TrainingState, AnnDataSummary } from '@/types/index';
 
 interface TrainingSummaryCardProps {

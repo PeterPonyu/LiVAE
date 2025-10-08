@@ -1,14 +1,9 @@
-
+// ========================================
 // src/components/results/DownloadSection.tsx
-'use client';
-
+// ========================================
 import React from 'react';
 import { Download, FileText, Layers, RefreshCw, Package, CheckCircle, AlertCircle } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, Button, Badge, Progress, Alert, AlertDescription } from './ui';
 import type { EmbeddingResult } from '@/types/index';
 
 interface DownloadSectionProps {

@@ -1,10 +1,10 @@
-
+// ========================================
 // src/components/data/DataSummaryCard.tsx
+// ========================================
 'use client';
 
 import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, Badge } from './ui';
 import type { AnnDataSummary } from '@/types/index';
 import { formatDistanceToNow } from 'date-fns';
 

@@ -3,12 +3,105 @@
 'use client';
 
 import React from 'react';
+import { useState, useEffect } from 'react';
 import { Upload, Activity, Download, Settings, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { useAppStatus } from '@/lib/hooks/useAppStatus';
+
+// Custom Button Component
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: 'default' | 'outline' | 'destructive' | 'secondary';
+  size?: 'sm' | 'md' | 'lg';
+  asChild?: boolean;
+  children: React.ReactNode;
+}
+
+const Button: React.FC<ButtonProps> = ({ 
+  variant = 'default', 
+  size = 'md',
+  className = '', 
+  disabled,
+  children,
+  ...props 
+}) => {
+  const baseStyles = 'inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none';
+  
+  const variants = {
+    default: 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500',
+    outline: 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:ring-blue-500',
+    destructive: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500',
+    secondary: 'bg-gray-200 text-gray-900 hover:bg-gray-300 focus:ring-gray-500'
+  };
+  
+  const sizes = {
+    sm: 'px-3 py-1.5 text-sm',
+    md: 'px-4 py-2 text-sm',
+    lg: 'px-6 py-3 text-base'
+  };
+  
+  return (
+    <button
+      className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`}
+      disabled={disabled}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+};
+
+// Custom Badge Component
+interface BadgeProps {
+  variant?: 'default' | 'secondary' | 'outline' | 'destructive';
+  children: React.ReactNode;
+  className?: string;
+}
+
+const Badge: React.FC<BadgeProps> = ({ variant = 'default', children, className = '' }) => {
+  const variants = {
+    default: 'bg-blue-600 text-white',
+    secondary: 'bg-gray-200 text-gray-900',
+    outline: 'border border-gray-300 bg-white text-gray-700',
+    destructive: 'bg-red-600 text-white'
+  };
+  
+  return (
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${variants[variant]} ${className}`}>
+      {children}
+    </span>
+  );
+};
+
+// Custom Card Components
+const Card: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = '' }) => (
+  <div className={`bg-white rounded-lg border border-gray-200 shadow-sm ${className}`}>
+    {children}
+  </div>
+);
+
+const CardHeader: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = '' }) => (
+  <div className={`px-6 py-5 border-b border-gray-200 ${className}`}>
+    {children}
+  </div>
+);
+
+const CardTitle: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = '' }) => (
+  <h3 className={`text-lg font-semibold text-gray-900 ${className}`}>
+    {children}
+  </h3>
+);
+
+const CardDescription: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = '' }) => (
+  <p className={`text-sm text-gray-500 mt-1 ${className}`}>
+    {children}
+  </p>
+);
+
+const CardContent: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = '' }) => (
+  <div className={`px-6 py-5 ${className}`}>
+    {children}
+  </div>
+);
 
 export default function Home() {
   const { 
@@ -31,6 +124,10 @@ export default function Home() {
   };
 
   const trainingStatus = getTrainingStatus();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <div className="container mx-auto p-8 max-w-6xl">
@@ -50,8 +147,9 @@ export default function Home() {
             System Status
             <div className="flex items-center space-x-2">
               <span className="text-sm text-gray-500">
-                Updated: {last_updated.toLocaleTimeString()}
+                Updated: {mounted ? last_updated.toLocaleTimeString(): "--:--:--"}
               </span>
+              
               <Button 
                 onClick={refresh} 
                 disabled={is_loading}
@@ -124,11 +222,11 @@ export default function Home() {
                   </p>
                 </div>
               </div>
-              <Button asChild className="mt-4 sm:mt-0">
-                <Link href="/training/monitor">
+              <Link href="/training/monitor" className="mt-4 sm:mt-0">
+                <Button>
                   View Progress →
-                </Link>
-              </Button>
+                </Button>
+              </Link>
             </div>
           </CardContent>
         </Card>
@@ -153,11 +251,11 @@ export default function Home() {
             <p className="text-sm text-gray-600 mb-4">
               Upload your single-cell RNA-seq data in AnnData (.h5ad) format
             </p>
-            <Button asChild className="w-full" variant={data_loaded ? "outline" : "default"}>
-              <Link href="/upload">
+            <Link href="/upload" className="block">
+              <Button className="w-full" variant={data_loaded ? "outline" : "default"}>
                 {data_loaded ? "Replace Data" : "Upload Data"}
-              </Link>
-            </Button>
+              </Button>
+            </Link>
           </CardContent>
         </Card>
 
@@ -178,16 +276,15 @@ export default function Home() {
             <p className="text-sm text-gray-600 mb-4">
               Set model parameters, training configuration, and QC filters
             </p>
-            <Button 
-              asChild 
-              className="w-full" 
-              variant="outline"
-              disabled={!data_loaded || training_running}
-            >
-              <Link href="/training/configure">
+            <Link href="/training/configure" className={`block ${(!data_loaded || training_running) ? 'pointer-events-none' : ''}`}>
+              <Button 
+                className="w-full" 
+                variant="outline"
+                disabled={!data_loaded || training_running}
+              >
                 {training_running ? "Training Running..." : "Configure Training"}
-              </Link>
-            </Button>
+              </Button>
+            </Link>
           </CardContent>
         </Card>
 
@@ -211,17 +308,16 @@ export default function Home() {
                 : "Start training and monitor progress"
               }
             </p>
-            <Button 
-              asChild 
-              className="w-full" 
-              variant={training_running ? "default" : "outline"}
-              disabled={!data_loaded}
-            >
-              <Link href="/training/monitor">
+            <Link href="/training/monitor" className={`block ${!data_loaded ? 'pointer-events-none' : ''}`}>
+              <Button 
+                className="w-full" 
+                variant={training_running ? "default" : "outline"}
+                disabled={!data_loaded}
+              >
                 {training_running ? "View Progress" : 
                  trainingStatus === 'completed' ? "View Results" : "Start Training"}
-              </Link>
-            </Button>
+              </Button>
+            </Link>
           </CardContent>
         </Card>
 
@@ -242,16 +338,15 @@ export default function Home() {
             <p className="text-sm text-gray-600 mb-4">
               Download trained embeddings and visualization results
             </p>
-            <Button 
-              asChild 
-              className="w-full" 
-              variant="outline"
-              disabled={trainingStatus !== 'completed'}
-            >
-              <Link href="/results">
+            <Link href="/results" className={`block ${trainingStatus !== 'completed' ? 'pointer-events-none' : ''}`}>
+              <Button 
+                className="w-full" 
+                variant="outline"
+                disabled={trainingStatus !== 'completed'}
+              >
                 Download Results
-              </Link>
-            </Button>
+              </Button>
+            </Link>
           </CardContent>
         </Card>
       </div>

@@ -1,11 +1,10 @@
+
 // ========================================
 // src/components/monitor/CurrentMetricsCard.tsx
 // ========================================
 'use client';
 
 import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import type { TrainingMetrics } from '@/types/index';
 
 interface CurrentMetricsCardProps {
@@ -14,14 +13,19 @@ interface CurrentMetricsCardProps {
 
 export const CurrentMetricsCard: React.FC<CurrentMetricsCardProps> = ({ latestMetrics }) => {
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle>Current Metrics</CardTitle>
-        <CardDescription>
+    <div className="rounded-lg border border-gray-200 bg-white shadow-sm">
+      {/* Card Header */}
+      <div className="flex flex-col space-y-1.5 p-6 pb-3">
+        <h3 className="text-2xl font-semibold leading-none tracking-tight">
+          Current Metrics
+        </h3>
+        <p className="text-sm text-gray-500">
           {latestMetrics && `Epoch ${latestMetrics.epoch}`}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
+        </p>
+      </div>
+
+      {/* Card Content */}
+      <div className="p-6 pt-0">
         {latestMetrics ? (
           <div className="grid grid-cols-4 gap-3">
             <MetricDisplay label="Loss" value={latestMetrics.loss} color="text-red-600" decimals={3} />
@@ -32,16 +36,16 @@ export const CurrentMetricsCard: React.FC<CurrentMetricsCardProps> = ({ latestMe
             <MetricDisplay label="DB" value={latestMetrics.db} color="text-red-500" decimals={3} size="sm" />
             <MetricDisplay label="PC" value={latestMetrics.pc} color="text-green-500" decimals={3} size="sm" />
             <div className="text-center flex items-center justify-center">
-              <Badge variant="outline" className="text-xs">
+              <span className="inline-flex items-center rounded-md border border-gray-300 bg-white px-2.5 py-0.5 text-xs font-semibold text-gray-700">
                 Live
-              </Badge>
+              </span>
             </div>
           </div>
         ) : (
           <p className="text-gray-500 text-sm">No metrics available yet</p>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 

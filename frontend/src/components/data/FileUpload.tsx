@@ -1,14 +1,12 @@
-
-// src/components/shared/FileUpload.tsx
+// ========================================
+// src/components/data/FileUpload.tsx
+// ========================================
 'use client';
 
 import React, { useCallback } from 'react';
 import { useDropzone, FileRejection } from 'react-dropzone';
 import { Upload, File, AlertCircle, CheckCircle } from 'lucide-react';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Progress } from '@/components/ui/progress';
+import { Card, Button, Alert, AlertDescription, Progress } from './ui';
 import { UPLOAD_CONSTRAINTS } from '@/types/index';
 
 interface FileUploadProps {
@@ -60,15 +58,15 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 
   return (
     <div className="w-full space-y-4">
-      <Card
+      <div
         {...getRootProps()}
         className={`
-          relative cursor-pointer border-2 border-dashed p-8 text-center transition-colors
+          relative cursor-pointer border-2 border-dashed rounded-lg p-8 text-center transition-colors
           ${isDragActive && !isDragReject ? 'border-blue-500 bg-blue-50' : ''}
           ${isDragReject ? 'border-red-500 bg-red-50' : ''}
           ${isUploading || disabled ? 'cursor-not-allowed opacity-50' : ''}
           ${isSuccess ? 'border-green-500 bg-green-50' : 'border-gray-300'}
-          hover:border-gray-400 hover:bg-gray-50
+          ${!isSuccess && !isUploading && !isDragActive ? 'hover:border-gray-400 hover:bg-gray-50' : ''}
         `}
       >
         <input {...getInputProps()} />
@@ -101,13 +99,13 @@ export const FileUpload: React.FC<FileUploadProps> = ({
           </div>
 
           {!isSuccess && !isUploading && (
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" type="button">
               <File className="mr-2 h-4 w-4" />
               Choose File
             </Button>
           )}
         </div>
-      </Card>
+      </div>
 
       {isUploading && (
         <div className="space-y-2">
@@ -121,10 +119,12 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 
       {error && (
         <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            {error}
-          </AlertDescription>
+          <div className="flex items-start gap-3">
+            <AlertCircle className="h-5 w-5 mt-0.5" />
+            <AlertDescription>
+              {error}
+            </AlertDescription>
+          </div>
         </Alert>
       )}
     </div>

@@ -1,13 +1,12 @@
+
 // ========================================
 // src/components/monitor/TrainingMonitor.tsx
 // ========================================
 'use client';
 
 import React, { useMemo } from 'react';
-import { ArrowLeft, RefreshCw, Activity } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Activity, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useTrainingMonitor } from '@/lib/hooks/useTrainingMonitor';
 import { TrainingStatusCard } from './TrainingStatusCard';
 import { CurrentMetricsCard } from './CurrentMetricsCard';
@@ -53,17 +52,26 @@ export const TrainingMonitor: React.FC = () => {
   if (error && !trainingState) {
     return (
       <div className="container mx-auto py-8 px-4 max-w-4xl">
-        <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
+        <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+            <p className="text-sm text-red-800">{error}</p>
+          </div>
+        </div>
         <div className="mt-4 flex gap-4">
-          <Button onClick={refresh}>
+          <button
+            onClick={refresh}
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 h-10 px-4 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          >
             <RefreshCw className="mr-2 h-4 w-4" />
             Retry
-          </Button>
-          <Button variant="outline" asChild>
-            <Link href="/">Back to Home</Link>
-          </Button>
+          </button>
+          <Link
+            href="/"
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 h-10 px-4 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          >
+            Back to Home
+          </Link>
         </div>
       </div>
     );
@@ -73,21 +81,28 @@ export const TrainingMonitor: React.FC = () => {
   if (!trainingState) {
     return (
       <div className="container mx-auto py-8 px-4 max-w-4xl">
-        <Alert>
-          <AlertDescription>
-            No training session found. Please configure and start training first.
-          </AlertDescription>
-        </Alert>
+        <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+            <p className="text-sm text-blue-800">
+              No training session found. Please configure and start training first.
+            </p>
+          </div>
+        </div>
         <div className="mt-4 flex gap-4">
-          <Button asChild>
-            <Link href="/training/configure">Configure Training</Link>
-          </Button>
-          <Button variant="outline" asChild>
-            <Link href="/">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Home
-            </Link>
-          </Button>
+          <Link
+            href="/training/configure"
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 h-10 px-4 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          >
+            Configure Training
+          </Link>
+          <Link
+            href="/"
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 h-10 px-4 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Home
+          </Link>
         </div>
       </div>
     );
@@ -107,15 +122,20 @@ export const TrainingMonitor: React.FC = () => {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={refresh} size="sm">
+          <button
+            onClick={refresh}
+            title='Refresh'
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 h-9 px-3 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          >
             <RefreshCw className="h-4 w-4" />
-          </Button>
-          <Button variant="outline" asChild>
-            <Link href="/">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Home
-            </Link>
-          </Button>
+          </button>
+          <Link
+            href="/"
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 h-9 px-4 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Home
+          </Link>
         </div>
       </div>
 
