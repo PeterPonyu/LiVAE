@@ -65,6 +65,16 @@ model = agent(
     irecon=1.0,             # Interpretable reconstruction
 )
 
+# Train the model
+model.fit(epochs=100)
+
+# Extract embeddings
+latent = model.get_latent()
+interpretable = model.get_iembed()
+
+print(latent.shape, interpretable.shape)
+```
+
 ### Embedding Outputs
 
 - Interpretable: `GET /embeddings/interpretable` → CSV: `/download/embeddings/interpretable`

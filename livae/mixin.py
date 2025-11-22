@@ -162,7 +162,12 @@ class envMixin:
         self,
         latent
     ):
-        labels = KMeans(latent.shape[1]).fit_predict(latent)
+        # Guard against requesting more clusters than samples
+        n_clusters = min(latent.shape[1], latent.shape[0])
+        if n_clusters < 2:
+            # Fallback: single cluster assignment
+            return np.zeros(latent.shape[0], dtype=int)
+        labels = KMeans(n_clusters).fit_predict(latent)
         return labels
     
     def _calc_corr(

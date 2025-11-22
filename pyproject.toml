@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "livae"
+version = "0.2.0"
+description = "Lorentzian Interpretable Variational Autoencoder for single-cell data"
+readme = "README.md"
+license = {file = "LICENSE"}
+authors = [
+  {name = "LiVAE Contributors"},
+]
+keywords = ["single-cell", "variational-autoencoder", "hyperbolic", "lorentz", "bioinformatics"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "License :: OSI Approved :: MIT License",
+  "Intended Audience :: Science/Research",
+  "Topic :: Scientific/Engineering :: Bio-Informatics"
+]
+requires-python = ">=3.10"
+dependencies = [
+  "torch>=2.3.0,<2.5.0",
+  "torchvision>=0.18.0,<0.20.0",
+  "scanpy>=1.10.0,<1.11.0",
+  "scvi-tools>=1.1.0,<1.2.0",
+  "anndata>=0.10.0,<0.11.0",
+  "scib>=1.0.0",
+  "numpy>=1.26.0,<1.27.0",
+  "pandas>=2.2.0,<2.3.0",
+  "scipy>=1.12.0,<1.13.0",
+  "scikit-learn>=1.5.0,<1.6.0",
+  "tqdm>=4.66.0,<5.0.0",
+  "fastapi>=0.117.0,<0.118.0",
+  "uvicorn[standard]>=0.36.0,<0.37.0",
+  "python-multipart>=0.0.6"
+]
+
+[tool.setuptools.packages.find]
+include = ["livae"]
+
+[project.urls]
+Homepage = "https://github.com/PeterPonyu/LiVAE"
+Source = "https://github.com/PeterPonyu/LiVAE"
+Issues = "https://github.com/PeterPonyu/LiVAE/issues"
