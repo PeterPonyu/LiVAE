@@ -2,12 +2,14 @@
 from fastapi import FastAPI, File, UploadFile, HTTPException, BackgroundTasks
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 import tempfile
 import os
 import torch
 from typing import Optional
 import asyncio
 from datetime import datetime
+from pathlib import Path
 
 # Import your existing model
 from livae.agent import agent
@@ -33,7 +35,7 @@ app = FastAPI(
 # Add CORS middleware for Next.js frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Next.js default port
+    allow_origins=["http://localhost:3000", "http://localhost:8000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -447,3 +449,64 @@ async def root():
 @app.on_event("shutdown")
 async def shutdown_event():
     state.clear_data()
+
+
+# Mount static files from Next.js build output
+# First, mount the _next directory for static assets
+static_dir = Path(__file__).parent.parent / "frontend" / "out"
+if static_dir.exists():
+    app.mount("/_next", StaticFiles(directory=static_dir / "_next"), name="static_next")
+
+    # Custom route to serve HTML files for client-side routing
+    @app.get("/{full_path:path}")
+    async def serve_frontend(full_path: str):
+        """Serve static files or fallback to index.html for client-side routing"""
+        # Construct the full file path
+        file_path = static_dir / full_path
+        
+        # If it's a directory or doesn't exist, try serving index.html in that directory
+        if not file_path.exists():
+            # Check for index.html in the directory
+            index_path = static_dir / full_path.rstrip("/") / "index.html"
+            if index_path.exists():
+                return FileResponse(path=index_path, media_type="text/html")
+            
+            # Fallback to root index.html for client-side routing
+            root_index = static_dir / "index.html"
+            if root_index.exists():
+                return FileResponse(path=root_index, media_type="text/html")
+            
+            # Return 404
+            raise HTTPException(status_code=404, detail="File not found")
+        
+        # Check if it's a file with an extension
+        if file_path.is_file():
+            # Determine media type
+            if file_path.suffix == ".html":
+                media_type = "text/html"
+            elif file_path.suffix == ".css":
+                media_type = "text/css"
+            elif file_path.suffix == ".js":
+                media_type = "application/javascript"
+            elif file_path.suffix == ".json":
+                media_type = "application/json"
+            elif file_path.suffix == ".svg":
+                media_type = "image/svg+xml"
+            elif file_path.suffix == ".ico":
+                media_type = "image/x-icon"
+            else:
+                media_type = "application/octet-stream"
+            
+            return FileResponse(path=file_path, media_type=media_type)
+        
+        # If it's a directory, try index.html
+        index_path = file_path / "index.html"
+        if index_path.exists():
+            return FileResponse(path=index_path, media_type="text/html")
+        
+        # Fallback to root index.html
+        root_index = static_dir / "index.html"
+        if root_index.exists():
+            return FileResponse(path=root_index, media_type="text/html")
+        
+        raise HTTPException(status_code=404, detail="File not found")

@@ -6,6 +6,7 @@ torchvision>=0.18.0,<0.20.0
 scanpy>=1.10.0,<1.11.0
 scvi-tools>=1.1.0,<1.2.0
 anndata>=0.10.0,<0.11.0
+scib>=1.0.0
 
 # Data Science Core
 numpy>=1.26.0,<1.27.0
@@ -17,6 +18,7 @@ scikit-learn>=1.5.0,<1.6.0
 fastapi>=0.117.0,<0.118.0
 uvicorn[standard]>=0.36.0,<0.37.0
 pydantic>=2.9.0,<2.10.0
+python-multipart>=0.0.6
 
 # Visualization (Core)
 matplotlib>=3.9.0,<3.10.0

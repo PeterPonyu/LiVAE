@@ -5,7 +5,7 @@
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.3+-red.svg)](https://pytorch.org/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-LiVAE (Lorentzian Interpretable Variational Autoencoder) is a novel deep generative model that combines hyperbolic geometry with multiple regularization techniques to learn interpretable latent representations.
+LiVAE (Lorentzian Interpretable Variational Autoencoder) learns interpretable latent representations for single-cell RNA-seq data using Lorentzian (hyperbolic) geometry and multi-component regularization.
 
 
 ## Installation
@@ -23,8 +23,26 @@ pip install -r requirements.txt
 pip install -e .
 ```
 
+### Core Requirements
 
-## Quick Start
+```text
+torch>=2.3.0,<2.5.0
+torchvision>=0.18.0,<0.20.0
+scanpy>=1.10.0,<1.11.0
+scvi-tools>=1.1.0,<1.2.0
+anndata>=0.10.0,<0.11.0
+scib>=1.0.0
+numpy>=1.26.0,<1.27.0
+pandas>=2.2.0,<2.3.0
+scipy>=1.12.0,<1.13.0
+scikit-learn>=1.5.0,<1.6.0
+tqdm>=4.66.0,<5.0.0
+fastapi>=0.117.0,<0.118.0
+uvicorn[standard]>=0.36.0,<0.37.0
+python-multipart>=0.0.6
+```
+
+## Python Quick Start
 
 ```python
 import scanpy as sc
@@ -47,37 +65,57 @@ model = agent(
     irecon=1.0,             # Interpretable reconstruction
 )
 
-# Train the model
-model.fit(epochs=1000)
+### Embedding Outputs
 
-# Extract representations
-latent_repr = model.get_latent()        # Primary latent space
-Interpretable_repr = model.get_iembed()   # Interpretable representation
+- Interpretable: `GET /embeddings/interpretable` → CSV: `/download/embeddings/interpretable`
+- Latent: `GET /embeddings/latent` → CSV: `/download/embeddings/latent`
+
+### Custom Deployment
+
+To host UI separately (any static server), serve files in `frontend/out/` and run FastAPI elsewhere. Adjust CORS `allow_origins` in `api/main.py` if domains differ.
+
+### Troubleshooting
+
+- Empty metrics early: need ≥10 epochs for first averaged metrics block.
+- 404 static asset: confirm `_next` directory present in `frontend/out/`.
+- CORS errors: add your UI origin to `allow_origins` list.
+
+### Minimal One-Liner (Unix)
+
+```bash
+pip install -r requirements.txt && uvicorn api.main:app --host 0.0.0.0 --port 8000
 ```
+
 
 ## Architecture Overview
 
 LiVAE consists of three main components working in concert:
 
 ### 1. **Encoder Network**
-```
+
+```text
 Input (gene expression) → Hidden → Hidden → μ, σ (latent parameters)
 ```
+
 - Maps high-dimensional gene expression to latent distribution parameters
 - Uses reparameterization trick for differentiable sampling
 
 ### 2. **Hyperbolic Transformation**
-```
+
+```text
 Latent Sample → Tangent Space → Exponential Map → Lorentzian Manifold
 ```
+
 - Projects latent vectors onto hyperbolic manifold
 - Enables natural representation of hierarchical relationships
 
 ### 3. **Dual Decoder Pathway**
-```
+
+```text
 Primary:      Latent → Decoder → Reconstruction
 Interpretable: Latent → Compress → Decompress → Decoder → Reconstruction
 ```
+
 - Dual reconstruction paths for enhanced representation learning
 - Compression bottleneck encourages essential feature extraction
 
@@ -85,66 +123,63 @@ Interpretable: Latent → Compress → Decompress → Decoder → Reconstruction
 
 LiVAE optimizes a composite loss function:
 
-```
+```text
 L_total = L_recon + L_irecon + L_lorentz + L_KL
 ```
 
 Where:
+
 - **L_recon**: Negative binomial reconstruction loss
 - **L_irecon**: Interpretable reconstruction loss  
 - **L_lorentz**: Lorentz distance regularization
 - **L_KL**: KL divergence
 
 
-# LiVAE Application
+## Evaluation Metrics
 
-A full-stack application with FastAPI backend and Next.js frontend.
+### Clustering Quality
 
-## 🚀 Quick Start
+- **ARI** (Adjusted Rand Index): Clustering agreement with ground truth
+- **NMI** (Normalized Mutual Information): Information-theoretic clustering measure
+- **ASW** (Average Silhouette Width): Cluster cohesion and separation
 
-### Prerequisites
-- **Python 3.10+** (for backend)
-- **Node.js** (for frontend static server)
+### Cluster Validity
 
-### Option 1: One-Command Start (Recommended)
-```bash
-python start_services.py
+- **C_H** (Calinski-Harabasz): Ratio of between to within cluster variance
+- **D_B** (Davies-Bouldin): Average similarity between clusters
+- **P_C** (Graph Connectivity): Connectivity within clusters
+
+### Batch Integration
+
+- **cLISI**: Cluster-specific Local Inverse Simpson Index
+- **iLISI**: Integration LISI for batch mixing
+- **bASW**: Batch-corrected Average Silhouette Width
+
+## Performance Tips
+
+### Memory Optimization
+
+```python
+# For large datasets, reduce batch size
+model = agent(adata, percent=0.005)  # Use 0.5% of data per batch
+
+# Use CPU if GPU memory is limited
+import torch
+model = agent(adata, device=torch.device('cpu'))
 ```
 
-### Option 2: Manual Start (Two Terminals)
+### Training Efficiency
 
-#### Terminal 1 - Start Backend
-```bash
-# Install FastAPI dependencies (if not installed)
-pip install fastapi uvicorn
+```python
+# Progressive training with increasing regularization
+model = agent(adata, beta=0.1, lorentz=0.0)
+model.fit(epochs=500)
 
-# Start the FastAPI backend from LiVAE folder
-uvicorn api.main:app --host 127.0.0.1 --port 8000 --reload
+# Increase regularization for fine-tuning
+model.beta = 1.0
+model.lorentz = 0.1
+model.fit(epochs=500)
 ```
-
-#### Terminal 2 - Start Frontend
-```bash
-npx serve frontend/outs -p 3000
-```
-
-## 📞 Quick Commands Reference
-
-```bash
-# Start everything (from LiVAE folder)
-python start_services.py
-
-# Start backend only (from LiVAE folder)
-uvicorn api.main:app --host 127.0.0.1 --port 8000 --reload
-
-# Start frontend only (from LiVAE folder)
-npx serve frontend/outs -p 3000
-
-# Stop all (Ctrl+C in terminals or):
-pkill -f uvicorn
-pkill -f "python.*http.server"
-```
-
-🎉 **Ready to go!** Start the services and visit http://127.0.0.1:3000
 
 
 ## License
