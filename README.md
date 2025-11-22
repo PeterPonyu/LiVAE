@@ -4,6 +4,7 @@
 [![PyPI version](https://img.shields.io/pypi/v/livae.svg)](https://pypi.org/project/livae/)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.3+-red.svg)](https://pytorch.org/)
+[![CI](https://github.com/PeterPonyu/LiVAE/actions/workflows/ci.yml/badge.svg)](https://github.com/PeterPonyu/LiVAE/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 LiVAE (Lorentzian Interpretable Variational Autoencoder) learns interpretable latent representations for single-cell RNA-seq data using Lorentzian (hyperbolic) geometry and multi-component regularization.
@@ -199,6 +200,27 @@ model.lorentz = 0.1
 model.fit(epochs=500)
 ```
 
+## Development & Releases
+
+### Automated Publishing
+
+LiVAE uses GitHub Actions to automatically publish new versions to PyPI when a GitHub release is created.
+
+**Release Process:**
+1. Update version in `livae/__init__.py` and `pyproject.toml`
+2. Commit and push changes
+3. Create a GitHub release with tag matching the version (e.g., `v0.2.2`)
+4. Package is automatically built and published to PyPI
+
+See [RELEASE.md](RELEASE.md) for detailed release instructions.
+
+### Contributing
+
+Contributions are welcome! Please ensure tests pass before submitting PRs:
+
+```bash
+pytest -q
+```
 
 ## License
 
