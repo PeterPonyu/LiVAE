@@ -184,9 +184,17 @@ class envMixin:
     ):
         ARI = adjusted_mutual_info_score(self.labels[self.idx], labels)
         NMI = normalized_mutual_info_score(self.labels[self.idx], labels)
-        ASW = silhouette_score(latent, labels)
-        C_H = calinski_harabasz_score(latent, labels)
-        D_B = davies_bouldin_score(latent, labels)
+        # Metrics requiring n_samples > n_labels
+        n_unique_labels = len(np.unique(labels))
+        if latent.shape[0] > n_unique_labels:
+            ASW = silhouette_score(latent, labels)
+            C_H = calinski_harabasz_score(latent, labels)
+            D_B = davies_bouldin_score(latent, labels)
+        else:
+            # Fallback when insufficient samples
+            ASW = 0.0
+            C_H = 0.0
+            D_B = 0.0
         P_C = self._calc_corr(latent)
         return ARI, NMI, ASW, C_H, D_B, P_C
 
