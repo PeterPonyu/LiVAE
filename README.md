@@ -11,15 +11,13 @@ LiVAE (Lorentzian Interpretable Variational Autoencoder) learns interpretable la
 ## Installation
 
 ```bash
-# Clone the repository
+# Install from PyPI
+pip install livae
+
+# Or clone and install from source
 git clone https://github.com/PeterPonyu/LiVAE.git
-
 cd LiVAE
-
-# Install dependencies
 pip install -r requirements.txt
-
-# Install in development mode
 pip install -e .
 ```
 
@@ -69,13 +67,15 @@ model = agent(
 model.fit(epochs=100)
 
 # Extract embeddings
-latent = model.get_latent()
-interpretable = model.get_iembed()
+latent = model.get_latent()          # Primary latent representation
+interpretable = model.get_iembed()   # Interpretable embedding (i_dim)
 
-print(latent.shape, interpretable.shape)
+# Access results
+print(f"Latent shape: {latent.shape}")
+print(f"Interpretable embedding shape: {interpretable.shape}")
 ```
 
-### Embedding Outputs
+### Web API & Embedding Outputs
 
 - Interpretable: `GET /embeddings/interpretable` → CSV: `/download/embeddings/interpretable`
 - Latent: `GET /embeddings/latent` → CSV: `/download/embeddings/latent`
@@ -95,6 +95,20 @@ To host UI separately (any static server), serve files in `frontend/out/` and ru
 ```bash
 pip install -r requirements.txt && uvicorn api.main:app --host 0.0.0.0 --port 8000
 ```
+
+## PyPI Publication
+
+LiVAE distributions are published on PyPI. To publish from source:
+
+```bash
+# Build distributions
+python -m build
+
+# Upload to PyPI (requires twine and PyPI token)
+python -m twine upload dist/*
+```
+
+GitHub Actions automatically runs tests on Python 3.10+ via `.github/workflows/ci.yml`.
 
 
 ## Architecture Overview
