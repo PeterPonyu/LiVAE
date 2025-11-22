@@ -1,6 +1,7 @@
 
 # LiVAE: Lorentzian Interpretable Variational Autoencoder
 
+[![PyPI version](https://img.shields.io/pypi/v/livae.svg)](https://pypi.org/project/livae/)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.3+-red.svg)](https://pytorch.org/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
@@ -11,14 +12,14 @@ LiVAE (Lorentzian Interpretable Variational Autoencoder) learns interpretable la
 ## Installation
 
 ```bash
-# Clone repository and install dependencies
+# Install from PyPI (recommended)
+pip install livae
+
+# Or install from source for development
 git clone https://github.com/PeterPonyu/LiVAE.git
 cd LiVAE
-pip install -r requirements.txt
 pip install -e .
 ```
-
-> **Note**: PyPI package publication is pending. Install from source for now.
 
 ### Core Requirements
 
