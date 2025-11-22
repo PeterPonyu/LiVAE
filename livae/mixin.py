@@ -163,7 +163,7 @@ class envMixin:
         latent
     ):
         # Guard against requesting more clusters than samples
-        n_clusters = min(latent.shape[1], latent.shape[0])
+        n_clusters = min(latent.shape[1], latent.shape[0] - 1)
         if n_clusters < 2:
             # Fallback: single cluster assignment
             return np.zeros(latent.shape[0], dtype=int)
@@ -184,14 +184,14 @@ class envMixin:
     ):
         ARI = adjusted_mutual_info_score(self.labels[self.idx], labels)
         NMI = normalized_mutual_info_score(self.labels[self.idx], labels)
-        # Metrics requiring n_samples > n_labels
+        # Metrics requiring n_samples > n_labels AND n_labels >= 2
         n_unique_labels = len(np.unique(labels))
-        if latent.shape[0] > n_unique_labels:
+        if latent.shape[0] > n_unique_labels and n_unique_labels >= 2:
             ASW = silhouette_score(latent, labels)
             C_H = calinski_harabasz_score(latent, labels)
             D_B = davies_bouldin_score(latent, labels)
         else:
-            # Fallback when insufficient samples
+            # Fallback when insufficient samples or clusters
             ASW = 0.0
             C_H = 0.0
             D_B = 0.0
