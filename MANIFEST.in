@@ -1,0 +1,30 @@
+# Include essential files
+include README.md
+include LICENSE
+include pyproject.toml
+include requirements.txt
+
+# Include package data
+recursive-include livae *.py
+
+# Include tests
+recursive-include tests *.py
+
+# Exclude everything else
+global-exclude __pycache__
+global-exclude *.py[cod]
+global-exclude .DS_Store
+global-exclude *.so
+global-exclude .git*
+
+# Explicitly exclude frontend, api, and other project files
+prune frontend
+prune api
+prune scripts
+prune .github
+prune dist
+prune build
+prune downloads
+exclude start_services.py
+exclude uvicorn_pid.txt
+exclude review-points.md

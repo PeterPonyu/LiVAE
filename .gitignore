@@ -1,22 +1,8 @@
-
-# =============================================================================
-# COMBINED .GITIGNORE FOR PYTHON BACKEND + NEXT.JS FRONTEND
-# OPTIMIZED FOR PRODUCTION-ONLY COMMITS
-# =============================================================================
-
-# -----------------------------------------------------------------------------
-# PYTHON BACKEND (.gitignore)
-# -----------------------------------------------------------------------------
-
-# Byte-compiled / optimized / DLL files
+# Python
 __pycache__/
-*.py[codz]
+*.py[cod]
 *$py.class
-
-# C extensions
 *.so
-
-# Distribution / packaging
 .Python
 build/
 develop-eggs/
@@ -24,26 +10,18 @@ dist/
 downloads/
 eggs/
 .eggs/
+lib/
 lib64/
 parts/
 sdist/
 var/
 wheels/
-share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
 MANIFEST
-
-# PyInstaller
-*.manifest
-*.spec
-
-# Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
-
-# Unit test / coverage reports
 htmlcov/
 .tox/
 .nox/
@@ -53,180 +31,71 @@ htmlcov/
 nosetests.xml
 coverage.xml
 *.cover
-*.py.cover
+*.py,cover
 .hypothesis/
 .pytest_cache/
-cover/
-
-# Translations
-*.mo
-*.pot
-
-# Django stuff:
 *.log
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
-
-# Flask stuff:
 instance/
 .webassets-cache
-
-# Scrapy stuff:
 .scrapy
-
-# Sphinx documentation
 docs/_build/
-
-# PyBuilder
 .pybuilder/
 target/
-
-# Jupyter Notebook
 .ipynb_checkpoints
-
-# IPython
 profile_default/
 ipython_config.py
-
-# pyenv
-# .python-version
-
-# pipenv
-#Pipfile.lock
-
-# UV
-#uv.lock
-
-# poetry
-#poetry.lock
-#poetry.toml
-
-# pdm
-#pdm.lock
-#pdm.toml
 .pdm-python
 .pdm-build/
-
-# pixi
-#pixi.lock
 .pixi
-
-# PEP 582
 __pypackages__/
-
-# Celery stuff
 celerybeat-schedule
 celerybeat.pid
-
-# SageMath parsed files
 *.sage.py
-
-# Spyder project settings
 .spyderproject
 .spyproject
-
-# Rope project settings
 .ropeproject
-
-# mkdocs documentation
 /site
-
-# mypy
 .mypy_cache/
 .dmypy.json
 dmypy.json
-
-# Pyre type checker
 .pyre/
-
-# pytype static type analyzer
 .pytype/
-
-# Cython debug symbols
 cython_debug/
-
-# Abstra
-.abstra/
-
-# Ruff stuff:
 .ruff_cache/
-
-# PyPI configuration file
 .pypirc
 
-# Cursor
-.cursorignore
-.cursorindexingignore
-
-# Marimo
-marimo/_static/
-marimo/_lsp/
-__marimo__/
-
-# -----------------------------------------------------------------------------
-# NODE.JS / NEXT.JS FRONTEND (.gitignore)
-# -----------------------------------------------------------------------------
-
-# Dependencies
+# Node.js / Frontend Development
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 .pnpm-debug.log*
-
-# Package managers
 .pnp
 .pnp.*
-.yarn/cache
-.yarn/unplugged
-.yarn/build-state.yml
-.yarn/install-state.gz
-.pnp.js
+.yarn/
+package-lock.json
+yarn.lock
 
-# Next.js development files
-.next/
-build/
-dist/
+# Next.js Development (exclude source, keep built output)
+frontend/src/
+frontend/components.json
+frontend/eslint.config.mjs
+frontend/next-env.d.ts
+frontend/next.config.ts
+frontend/package.json
+frontend/postcss.config.mjs
+frontend/tsconfig.json
+frontend/README.md
+frontend/start.ts
+frontend/public/
+frontend/.next/
+frontend/build/
 
-# PRODUCTION BUILD - ALLOW THESE TO BE COMMITTED
-# out/ - commented out to allow production build
-# start.js - allow compiled start script
-
-# Vercel
-.vercel
-
-# Turbopack cache (Next.js 13+)
-.turbo
-
-# TypeScript compilation
-*.tsbuildinfo
-next-env.d.ts
-
-# Testing
-/coverage
-.nyc_output
-jest-coverage/
-.jest-cache/
-
-# ESLint
-.eslintcache
-
-# Prettier
-.prettierignore
-
-# Tailwind CSS
-.tailwindcss-cache/
-
-# PostCSS
-.postcss-cache/
-
-# -----------------------------------------------------------------------------
-# SHARED ENVIRONMENT & CONFIGURATION
-# -----------------------------------------------------------------------------
-
-# Environment variables
+# Environment
 .env
 .env.local
 .env.development
@@ -240,51 +109,25 @@ ENV/
 env.bak/
 venv.bak/
 
-# Keep example files
-!.env.example
-!.env.template
-
-# -----------------------------------------------------------------------------
-# DEVELOPMENT TOOLS & IDEs
-# -----------------------------------------------------------------------------
-
-# Visual Studio Code
+# IDEs
 .vscode/
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-
-# JetBrains IDEs (PyCharm, WebStorm, etc.)
 .idea/
 *.iws
 *.iml
 *.ipr
-
-# Sublime Text
 *.sublime-project
 *.sublime-workspace
-
-# Vim
 *.swp
 *.swo
 *~
-
-# Emacs
-*~
-\#*\#
-/.emacs.desktop
-/.emacs.desktop.lock
+.emacs.desktop
+.emacs.desktop.lock
 *.elc
 auto-save-list
 tramp
 .\#*
 
-# -----------------------------------------------------------------------------
-# OPERATING SYSTEM FILES
-# -----------------------------------------------------------------------------
-
-# macOS
+# OS Files
 .DS_Store
 .DS_Store?
 ._*
@@ -292,107 +135,47 @@ tramp
 .Trashes
 .AppleDouble
 .LSOverride
-Icon
-
-# Windows
 Thumbs.db
 Thumbs.db:encryptable
 ehthumbs.db
 ehthumbs_vista.db
 Desktop.ini
 $RECYCLE.BIN/
-*.cab
-*.msi
-*.msix
-*.msm
-*.msp
 *.lnk
-
-# Linux
-*~
 .fuse_hidden*
 .directory
 .Trash-*
 .nfs*
 
-# -----------------------------------------------------------------------------
-# PROJECT SPECIFIC FILES
-# -----------------------------------------------------------------------------
-
-# Data files (common in ML projects)
+# Project Specific
 *.csv
-*.json
-# IMPORTANT: Keep essential JSON files
-!package.json
-!package-lock.json
 *.h5
 *.h5ad
 *.xlsx
 *.parquet
-/data/
-/datasets/
-/models/
-/checkpoints/
-/results/
-/outputs/
-
-# Logs and temporary files
-*.log
+downloads/
+data/
+datasets/
+models/
+checkpoints/
+results/
+outputs/
 *.tmp
 *.temp
 temp/
 tmp/
 logs/
-
-# Database files
 *.db
 *.sqlite
 *.sqlite3
-
-# Backup files
 *.bak
 *.backup
-*~
+uvicorn_pid.txt
+review-points.md
 
-# Archive files
-*.tar
-*.tar.gz
-*.zip
-*.rar
-*.7z
-
-# -----------------------------------------------------------------------------
-# DOCKER & DEPLOYMENT
-# -----------------------------------------------------------------------------
-
-# Docker
-.dockerignore
-docker-compose.override.yml
-
-# Keep main docker files
-!Dockerfile
-!docker-compose.yml
-!.dockerignore
-
-# Kubernetes
-*.yaml.backup
-*.yml.backup
-
-# -----------------------------------------------------------------------------
-# DOCUMENTATION & ASSETS (KEEP THESE)
-# -----------------------------------------------------------------------------
-
-# Keep documentation
+# Keep essential files
 !README.md
-!README.rst
-!CHANGELOG.md
-!LICENSE*
-!CONTRIBUTING.md
-!docs/
-!documentation/
-
-# Keep configuration templates
-!.gitignore
-!.editorconfig
-!.github/
-
+!LICENSE
+!requirements.txt
+!pyproject.toml
+frontend/*.tsbuildinfo

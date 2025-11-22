@@ -37,8 +37,11 @@ dependencies = [
   "python-multipart>=0.0.6"
 ]
 
-[tool.setuptools.packages.find]
-include = ["livae"]
+[tool.setuptools]
+packages = ["livae"]
+
+[tool.setuptools.package-data]
+livae = ["*.py"]
 
 [project.urls]
 Homepage = "https://github.com/PeterPonyu/LiVAE"
