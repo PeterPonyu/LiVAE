@@ -11,15 +11,14 @@ LiVAE (Lorentzian Interpretable Variational Autoencoder) learns interpretable la
 ## Installation
 
 ```bash
-# Install from PyPI
-pip install livae
-
-# Or clone and install from source
+# Clone repository and install dependencies
 git clone https://github.com/PeterPonyu/LiVAE.git
 cd LiVAE
 pip install -r requirements.txt
 pip install -e .
 ```
+
+> **Note**: PyPI package publication is pending. Install from source for now.
 
 ### Core Requirements
 
@@ -75,40 +74,34 @@ print(f"Latent shape: {latent.shape}")
 print(f"Interpretable embedding shape: {interpretable.shape}")
 ```
 
-### Web API & Embedding Outputs
+## Web Interface
 
-- Interpretable: `GET /embeddings/interpretable` → CSV: `/download/embeddings/interpretable`
-- Latent: `GET /embeddings/latent` → CSV: `/download/embeddings/latent`
+LiVAE includes an integrated web interface for interactive training and visualization.
 
-### Custom Deployment
-
-To host UI separately (any static server), serve files in `frontend/out/` and run FastAPI elsewhere. Adjust CORS `allow_origins` in `api/main.py` if domains differ.
-
-### Troubleshooting
-
-- Empty metrics early: need ≥10 epochs for first averaged metrics block.
-- 404 static asset: confirm `_next` directory present in `frontend/out/`.
-- CORS errors: add your UI origin to `allow_origins` list.
-
-### Minimal One-Liner (Unix)
+### Launch the Application
 
 ```bash
-pip install -r requirements.txt && uvicorn api.main:app --host 0.0.0.0 --port 8000
+# Start the FastAPI server (serves both API and frontend)
+uvicorn api.main:app --host 0.0.0.0 --port 8000
 ```
 
-## PyPI Publication
+Access the web interface at `http://localhost:8000`
 
-LiVAE distributions are published on PyPI. To publish from source:
+### Features
 
-```bash
-# Build distributions
-python -m build
+- **Data Upload**: Upload single-cell datasets (H5AD format)
+- **Training Configuration**: Configure model parameters and hyperparameters
+- **Real-time Monitoring**: Track loss curves and metrics during training
+- **Results Visualization**: Download embeddings and view training summaries
 
-# Upload to PyPI (requires twine and PyPI token)
-python -m twine upload dist/*
-```
+### API Endpoints
 
-GitHub Actions automatically runs tests on Python 3.10+ via `.github/workflows/ci.yml`.
+- `POST /upload` - Upload dataset
+- `POST /train/start` - Start training
+- `GET /train/metrics` - Get training metrics
+- `GET /embeddings/interpretable` - Get interpretable embeddings
+- `GET /embeddings/latent` - Get latent embeddings
+- `GET /download/embeddings/{type}` - Download embeddings as CSV
 
 
 ## Architecture Overview
