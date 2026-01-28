@@ -1,5 +1,5 @@
 
-# LiVAE: Lorentzian Interpretable Variational Autoencoder
+# LiVAE: Lorentz-regularized Interpretable Variational Autoencoder
 
 [![PyPI version](https://img.shields.io/pypi/v/livae.svg)](https://pypi.org/project/livae/)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
@@ -7,7 +7,7 @@
 [![CI](https://github.com/PeterPonyu/LiVAE/actions/workflows/ci.yml/badge.svg)](https://github.com/PeterPonyu/LiVAE/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-LiVAE (Lorentzian Interpretable Variational Autoencoder) learns interpretable latent representations for single-cell RNA-seq data using Lorentzian (hyperbolic) geometry and multi-component regularization.
+LiVAE (Lorentz-regularized Interpretable Variational Autoencoder) is a dual-pathway architecture for learning interpretable latent representations from single-cell transcriptomic and epigenomic data. It applies hyperbolic geometry as soft regularization over standard Euclidean latent spaces to balance local fidelity with global coherence.
 
 
 ## Installation
@@ -180,7 +180,7 @@ Where:
 
 ```python
 # For large datasets, reduce batch size
-model = agent(adata, percent=0.005)  # Use 0.5% of data per batch
+model = agent(adata, percent=0.005)  # Use 0.5% of data per batch (default is 1%)
 
 # Use CPU if GPU memory is limited
 import torch
@@ -198,6 +198,23 @@ model.fit(epochs=500)
 model.beta = 1.0
 model.lorentz = 0.1
 model.fit(epochs=500)
+```
+
+## Citation
+
+If you use LiVAE in your research, please cite the following paper:
+
+```bibtex
+@ARTICLE{10.3389/fgene.2025.1713727,
+    AUTHOR={Fu, Zeyu and Fu, Jiawei and Chen, Chunlin and Zhang, Keyang and Wang, Song},
+    TITLE={Lorentz-regularized interpretable VAE for multi-scale single-cell transcriptomic and epigenomic embeddings},
+    JOURNAL={Frontiers in Genetics},
+    VOLUME={16},
+    YEAR={2025},
+    URL={https://www.frontiersin.org/journals/genetics/articles/10.3389/fgene.2025.1713727},
+    DOI={10.3389/fgene.2025.1713727},
+    ISSN={1664-8021}
+}
 ```
 
 ## Development & Releases
