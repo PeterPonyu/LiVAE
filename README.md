@@ -217,23 +217,9 @@ If you use LiVAE in your research, please cite the following paper:
 }
 ```
 
-## Development & Releases
+## Contributing
 
-### Automated Publishing
-
-LiVAE uses GitHub Actions to automatically publish new versions to PyPI when a GitHub release is created.
-
-**Release Process:**
-1. Update version in `livae/__init__.py` and `pyproject.toml`
-2. Commit and push changes
-3. Create a GitHub release with tag matching the version (e.g., `v0.2.2`)
-4. Package is automatically built and published to PyPI
-
-See [RELEASE.md](RELEASE.md) for detailed release instructions.
-
-### Contributing
-
-Contributions are welcome! Please ensure tests pass before submitting PRs:
+Contributions are welcome. Please ensure tests pass before submitting PRs:
 
 ```bash
 pytest -q
