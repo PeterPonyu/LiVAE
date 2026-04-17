@@ -1,8 +1,3 @@
-<div align="center">
-  <a href="https://peterponyu.github.io/">
-    <img src="https://peterponyu.github.io/assets/badges/LiVAE.svg" width="64" alt="ZF Lab · LiVAE">
-  </a>
-</div>
 
 # LiVAE: Lorentz-regularized Interpretable Variational Autoencoder
 
@@ -224,7 +219,7 @@ If you use LiVAE in your research, please cite the following paper:
 
 ## Contributing
 
-Contributions are welcome. Please ensure tests pass before submitting PRs:
+Contributions are welcome! Please ensure tests pass before submitting PRs:
 
 ```bash
 pytest -q
