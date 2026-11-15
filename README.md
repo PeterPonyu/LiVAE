@@ -210,7 +210,8 @@ If you use LiVAE in your research, please cite the following paper:
     TITLE={Lorentz-regularized interpretable VAE for multi-scale single-cell transcriptomic and epigenomic embeddings},
     JOURNAL={Frontiers in Genetics},
     VOLUME={16},
-    YEAR={2025},
+    PAGES={1713727},
+    YEAR={2026},
     URL={https://www.frontiersin.org/journals/genetics/articles/10.3389/fgene.2025.1713727},
     DOI={10.3389/fgene.2025.1713727},
     ISSN={1664-8021}
