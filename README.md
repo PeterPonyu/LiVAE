@@ -1,11 +1,12 @@
 
 # LiVAE: Lorentz-regularized Interpretable Variational Autoencoder
 
-[![PyPI version](https://img.shields.io/pypi/v/livae-sc.svg)](https://pypi.org/project/livae-sc/)
+[![PyPI](https://img.shields.io/pypi/v/livae-sc.svg)](https://pypi.org/project/livae-sc/)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24267216.svg)](https://doi.org/10.5281/zenodo.24267216)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.3+-red.svg)](https://pytorch.org/)
 [![CI](https://github.com/PeterPonyu/LiVAE/actions/workflows/ci.yml/badge.svg)](https://github.com/PeterPonyu/LiVAE/actions/workflows/ci.yml)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/PeterPonyu/LiVAE/blob/main/LICENSE)
 
 LiVAE (Lorentz-regularized Interpretable Variational Autoencoder) is a dual-pathway architecture for learning interpretable latent representations from single-cell transcriptomic and epigenomic data. It applies hyperbolic geometry as soft regularization over standard Euclidean latent spaces to balance local fidelity with global coherence.
 
@@ -100,12 +101,15 @@ Access the web interface at `http://localhost:8000`
 
 ### API Endpoints
 
-- `POST /upload` - Upload dataset
-- `POST /train/start` - Start training
-- `GET /train/metrics` - Get training metrics
-- `GET /embeddings/interpretable` - Get interpretable embeddings
-- `GET /embeddings/latent` - Get latent embeddings
-- `GET /download/embeddings/{type}` - Download embeddings as CSV
+- `POST /upload-data` - Upload an `.h5ad` dataset
+- `GET /data-summary` - Get a summary of the loaded dataset
+- `POST /start-training` - Start training
+- `GET /training-progress` - Get training progress and metrics (averaged over the last 10 epochs)
+- `POST /stop-training` - Stop training
+- `GET /embeddings/interpretable` - Get the shape of the interpretable embedding
+- `GET /embeddings/latent` - Get the shape of the latent embedding
+- `GET /download/embeddings/{embedding_type}` - Download an embedding (`interpretable` or `latent`) as CSV
+- `GET /status` - Get application status
 
 
 ## Architecture Overview
@@ -158,23 +162,14 @@ Where:
 
 ## Evaluation Metrics
 
-### Clustering Quality
+Every training step scores the latent representation of the current mini-batch without using cell labels. Reference labels come from k-means clustering (`latent_dim` clusters) of the log1p-transformed input layer, computed once when the agent is created; the mini-batch latent representation is clustered with k-means (`latent_dim` clusters). `fit` shows the latest scores every 10 epochs:
 
-- **ARI** (Adjusted Rand Index): Clustering agreement with ground truth
-- **NMI** (Normalized Mutual Information): Information-theoretic clustering measure
-- **ASW** (Average Silhouette Width): Cluster cohesion and separation
-
-### Cluster Validity
-
-- **C_H** (Calinski-Harabasz): Ratio of between to within cluster variance
-- **D_B** (Davies-Bouldin): Average similarity between clusters
-- **P_C** (Graph Connectivity): Connectivity within clusters
-
-### Batch Integration
-
-- **cLISI**: Cluster-specific Local Inverse Simpson Index
-- **iLISI**: Integration LISI for batch mixing
-- **bASW**: Batch-corrected Average Silhouette Width
+- **ARI**: computed with `adjusted_mutual_info_score`, i.e. the adjusted mutual information between the reference labels and the latent clusters (not the adjusted Rand index)
+- **NMI**: normalized mutual information between the reference labels and the latent clusters
+- **ASW**: silhouette score of the latent clusters
+- **C_H**: Calinski-Harabasz score of the latent clusters
+- **D_B**: Davies-Bouldin score of the latent clusters (lower is better)
+- **P_C**: mean, over latent dimensions, of the summed absolute Pearson correlation with the other latent dimensions
 
 ## Performance Tips
 
@@ -230,4 +225,4 @@ pytest -q
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](https://github.com/PeterPonyu/LiVAE/blob/main/LICENSE) file for details.

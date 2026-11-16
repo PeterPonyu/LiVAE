@@ -5,11 +5,11 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "livae-sc"
 version = "0.2.3"
-description = "Lorentzian Interpretable Variational Autoencoder for single-cell data"
+description = "LiVAE: Lorentz-regularized interpretable VAE for multi-scale single-cell transcriptomic and epigenomic embeddings"
 readme = "README.md"
-license = {file = "LICENSE"}
+license = {text = "MIT"}
 authors = [
-  {name = "LiVAE Contributors"},
+  {name = "Zeyu Fu"},
 ]
 keywords = ["single-cell", "variational-autoencoder", "hyperbolic", "lorentz", "bioinformatics"]
 classifiers = [
@@ -46,4 +46,5 @@ livae = ["*.py"]
 [project.urls]
 Homepage = "https://github.com/PeterPonyu/LiVAE"
 Source = "https://github.com/PeterPonyu/LiVAE"
+Paper = "https://doi.org/10.3389/fgene.2025.1713727"
 Issues = "https://github.com/PeterPonyu/LiVAE/issues"
