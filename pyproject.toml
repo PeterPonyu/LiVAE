@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "livae-sc"
-version = "0.2.3"
+version = "0.2.4"
 description = "LiVAE: Lorentz-regularized interpretable VAE for multi-scale single-cell transcriptomic and epigenomic embeddings"
 readme = "README.md"
 license = {text = "MIT"}

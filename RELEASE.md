@@ -154,6 +154,6 @@ python -m build
 
 ## Current Release
 
-**Latest Version:** v0.2.3  
-**PyPI:** https://pypi.org/project/livae-sc/0.2.3/  
-**GitHub:** https://github.com/PeterPonyu/LiVAE/releases/tag/v0.2.3
+**Latest Version:** v0.2.4  
+**PyPI:** https://pypi.org/project/livae-sc/0.2.4/  
+**GitHub:** https://github.com/PeterPonyu/LiVAE/releases/tag/v0.2.4
