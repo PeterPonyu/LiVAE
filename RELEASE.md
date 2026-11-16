@@ -14,7 +14,7 @@ When you create a new GitHub release, the package is **automatically published t
 
 **Steps:**
 1. Checks out the code
-2. Verifies the git tag version matches `livae.__version__`
+2. Verifies that the git tag matches the version in `pyproject.toml` and `livae/__init__.py` (read as text, without importing the package)
 3. Builds wheel and sdist distributions
 4. Validates distributions with twine
 5. Uploads to PyPI using `PYPI_API_TOKEN` secret

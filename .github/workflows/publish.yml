@@ -22,16 +22,19 @@ jobs:
       - name: Install build dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install build twine
+          pip install build twine tomli
       
       - name: Verify version matches tag
         run: |
           TAG_VERSION=${GITHUB_REF#refs/tags/v}
-          PACKAGE_VERSION=$(python -c "import livae; print(livae.__version__)")
+          # Read both version strings as text: importing livae would need torch and the other runtime dependencies.
+          PACKAGE_VERSION=$(python -c "import tomli; print(tomli.load(open('pyproject.toml', 'rb'))['project']['version'])")
+          INIT_VERSION=$(sed -n "s/^__version__ = ['\"]\([^'\"]*\)['\"].*/\1/p" livae/__init__.py)
           echo "Tag version: $TAG_VERSION"
-          echo "Package version: $PACKAGE_VERSION"
-          if [ "$TAG_VERSION" != "$PACKAGE_VERSION" ]; then
-            echo "Error: Tag version ($TAG_VERSION) does not match package version ($PACKAGE_VERSION)"
+          echo "pyproject.toml version: $PACKAGE_VERSION"
+          echo "livae/__init__.py version: $INIT_VERSION"
+          if [ "$TAG_VERSION" != "$PACKAGE_VERSION" ] || [ "$TAG_VERSION" != "$INIT_VERSION" ]; then
+            echo "Error: tag ($TAG_VERSION), pyproject.toml ($PACKAGE_VERSION) and livae/__init__.py ($INIT_VERSION) must match"
             exit 1
           fi
       
