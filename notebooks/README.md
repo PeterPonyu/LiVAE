@@ -43,7 +43,7 @@ Compare different regularization strategies:
 
 ```bash
 # Install LiVAE
-pip install livae
+pip install livae-sc
 
 # Install tutorial dependencies
 pip install jupyter matplotlib seaborn scanpy
@@ -185,7 +185,7 @@ model = agent(adata, beta=1e-2, lorentz=5.0, irecon=1.0)
 - **Documentation:** [GitHub Repository](https://github.com/PeterPonyu/LiVAE)
 - **Paper:** LiVAE: Lorentzian Interpretable VAE for single-cell analysis
 - **Issues:** [Report bugs](https://github.com/PeterPonyu/LiVAE/issues)
-- **PyPI:** [livae package](https://pypi.org/project/livae/)
+- **PyPI:** [livae-sc package](https://pypi.org/project/livae-sc/)
 
 ---
 

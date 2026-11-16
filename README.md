@@ -1,7 +1,7 @@
 
 # LiVAE: Lorentz-regularized Interpretable Variational Autoencoder
 
-[![PyPI version](https://img.shields.io/pypi/v/livae.svg)](https://pypi.org/project/livae/)
+[![PyPI version](https://img.shields.io/pypi/v/livae-sc.svg)](https://pypi.org/project/livae-sc/)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.3+-red.svg)](https://pytorch.org/)
 [![CI](https://github.com/PeterPonyu/LiVAE/actions/workflows/ci.yml/badge.svg)](https://github.com/PeterPonyu/LiVAE/actions/workflows/ci.yml)
@@ -14,13 +14,15 @@ LiVAE (Lorentz-regularized Interpretable Variational Autoencoder) is a dual-path
 
 ```bash
 # Install from PyPI (recommended)
-pip install livae
+pip install livae-sc
 
 # Or install from source for development
 git clone https://github.com/PeterPonyu/LiVAE.git
 cd LiVAE
 pip install -e .
 ```
+
+From version 0.2.3 the package is published on PyPI as `livae-sc`; the import name is still `livae`. The earlier `livae` project on PyPI stays at 0.2.1 and is no longer updated.
 
 ### Core Requirements
 

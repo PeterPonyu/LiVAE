@@ -69,10 +69,10 @@ git push origin main
 python -m build
 
 # Create release
-gh release create v0.2.2 \
-  dist/livae-0.2.2.tar.gz \
-  dist/livae-0.2.2-py3-none-any.whl \
-  --title "v0.2.2: Release Title" \
+gh release create v0.2.3 \
+  dist/livae_sc-0.2.3.tar.gz \
+  dist/livae_sc-0.2.3-py3-none-any.whl \
+  --title "v0.2.3: Release Title" \
   --notes "Release notes here"
 ```
 
@@ -95,13 +95,13 @@ Once the release is published:
 
 ```bash
 # Wait ~2 minutes for PyPI to index
-pip install --upgrade livae
+pip install --upgrade livae-sc
 
 # Verify version
 python -c "import livae; print(livae.__version__)"
 ```
 
-**PyPI Package:** https://pypi.org/project/livae/
+**PyPI Package:** https://pypi.org/project/livae-sc/
 
 ## Manual PyPI Publishing (Fallback)
 
