@@ -17,11 +17,11 @@ When you create a new GitHub release, the package is **automatically published t
 2. Verifies that the git tag matches the version in `pyproject.toml` and `livae/__init__.py` (read as text, without importing the package)
 3. Builds wheel and sdist distributions
 4. Validates distributions with twine
-5. Uploads to PyPI using `PYPI_API_TOKEN` secret
+5. Uploads to PyPI through trusted publishing (GitHub OIDC; no API token is stored in the repository)
 
 ### Prerequisites
 
-✅ **PYPI_API_TOKEN** secret is configured in repository settings  
+✅ The `livae-sc` project on PyPI trusts `PeterPonyu/LiVAE`, workflow `publish.yml`, environment `pypi`  
 ✅ Version in `livae/__init__.py` matches the release tag  
 ✅ Version in `pyproject.toml` matches the release tag
 
@@ -117,7 +117,7 @@ python -m twine check dist/*
 # Upload to PyPI
 python -m twine upload dist/*
 # Username: __token__
-# Password: [PYPI_API_TOKEN value]
+# Password: [a PyPI API token]
 ```
 
 ## Version Numbering
@@ -138,14 +138,10 @@ Error: Tag version (0.2.2) does not match package version (0.2.1)
 
 **Solution:** Update `livae/__init__.py` and `pyproject.toml` to match the tag.
 
-### PyPI Token Invalid
+### PyPI Rejects the Upload (403 or invalid-publisher)
 
-**Solution:** Regenerate token at https://pypi.org/manage/account/token/ and update `PYPI_API_TOKEN` secret:
-
-```bash
-gh secret set PYPI_API_TOKEN --repo PeterPonyu/LiVAE
-# Paste token when prompted
-```
+**Solution:** Open https://pypi.org/manage/project/livae-sc/settings/publishing/ and check that the trusted
+publisher names owner `PeterPonyu`, repository `LiVAE`, workflow `publish.yml` and environment `pypi`.
 
 ### Build Fails
 
