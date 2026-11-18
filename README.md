@@ -28,21 +28,15 @@ From version 0.2.3 the package is published on PyPI as `livae-sc`; the import na
 ### Core Requirements
 
 ```text
-torch>=2.3.0,<2.5.0
-torchvision>=0.18.0,<0.20.0
-scanpy>=1.10.0,<1.11.0
-scvi-tools>=1.1.0,<1.2.0
-anndata>=0.10.0,<0.11.0
-scib>=1.0.0
-numpy>=1.26.0,<1.27.0
-pandas>=2.2.0,<2.3.0
-scipy>=1.12.0,<1.13.0
-scikit-learn>=1.5.0,<1.6.0
-tqdm>=4.66.0,<5.0.0
-fastapi>=0.117.0,<0.118.0
-uvicorn[standard]>=0.36.0,<0.37.0
-python-multipart>=0.0.6
+torch>=2.3
+numpy>=1.26
+scikit-learn>=1.5
+anndata>=0.10
+tqdm>=4.66
 ```
+
+These are what the `livae` package imports. The web interface and the notebooks need more:
+install them with `pip install "livae-sc[app]"` or `pip install "livae-sc[notebooks]"`.
 
 ## Python Quick Start
 
@@ -86,6 +80,9 @@ LiVAE includes an integrated web interface for interactive training and visualiz
 ### Launch the Application
 
 ```bash
+# The web app runs from a source checkout; install its extra packages first
+pip install -e ".[app]"
+
 # Start the FastAPI server (serves both API and frontend)
 uvicorn api.main:app --host 0.0.0.0 --port 8000
 ```
