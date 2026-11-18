@@ -35,8 +35,9 @@ anndata>=0.10
 tqdm>=4.66
 ```
 
-These are what the `livae` package imports. The web interface and the notebooks need more:
-install them with `pip install "livae-sc[app]"` or `pip install "livae-sc[notebooks]"`.
+These are what the `livae` package imports. The notebooks need more: `pip install
+"livae-sc[notebooks]"`. The web interface runs from a source checkout (see Web Interface):
+`pip install -e ".[app]"`.
 
 ## Python Quick Start
 
